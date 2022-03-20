@@ -1,19 +1,25 @@
 package ro.randr.tictactoe.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.GridLayout;
-import android.widget.Toast;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+
+import ro.randr.tictactoe.Adapters.RecycleViewChatAdapter;
+import ro.randr.tictactoe.Adapters.RecycleViewDevicesAdapter;
+import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.R;
 import ro.randr.tictactoe.Utils.ConnectionUtils;
 import ro.randr.tictactoe.Views.GridLayoutItem;
@@ -21,7 +27,9 @@ import ro.randr.tictactoe.Views.GridLayoutItem;
 public class GameAndChatActivity extends AppCompatActivity {
 
     private GridLayoutItem[] myViews;
-    private GridLayout myGridLayout;
+    private GridLayout gl_game_grid;
+    private RecyclerView rv_chat_history;
+    public static RecycleViewChatAdapter mAdapter;
     private AppCompatEditText et_message;
     private AppCompatImageView iv_send;
     @Override
@@ -33,25 +41,37 @@ public class GameAndChatActivity extends AppCompatActivity {
     }
 
     private void getViews() {
-        myGridLayout = findViewById(R.id.gl_grid);
+        gl_game_grid = findViewById(R.id.gl_grid);
         et_message = findViewById(R.id.et_message);
         iv_send = findViewById(R.id.iv_send);
+        rv_chat_history = findViewById(R.id.rv_chat_history);
     }
 
     private void setViews() {
         iv_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ConnectionUtils.SendMessage(getApplicationContext(), et_message.getText().toString());
+                ConnectionUtils.SendMessage(getApplicationContext(), new ChatMessageModel(ConnectionUtils.username, et_message.getText().toString()));
                 et_message.setText("");
             }
         });
         setGrid();
+        setRecycleView();
+    }
+
+    private void setRecycleView() {
+        rv_chat_history.setHasFixedSize(true);
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 1);
+        rv_chat_history.setLayoutManager(mLayoutManager);
+        rv_chat_history.setItemAnimator(new DefaultItemAnimator());
+
+        mAdapter = new RecycleViewChatAdapter(new WeakReference<>(this), new ArrayList<>());
+        rv_chat_history.setAdapter(mAdapter);
     }
 
     private void setGrid() {
-        int numOfCol = myGridLayout.getColumnCount();
-        int numOfRow = myGridLayout.getRowCount();
+        int numOfCol = gl_game_grid.getColumnCount();
+        int numOfRow = gl_game_grid.getRowCount();
         myViews = new GridLayoutItem[numOfCol * numOfRow];
         for (int yPos = 0; yPos < numOfRow; yPos++) {
             for (int xPos = 0; xPos < numOfCol; xPos++) {
@@ -64,11 +84,11 @@ public class GameAndChatActivity extends AppCompatActivity {
                     view.setBackgroundColor(Color.GREEN);
                 });
                 myViews[yPos * numOfCol + xPos] = tView;
-                myGridLayout.addView(tView);
+                gl_game_grid.addView(tView);
             }
         }
 
-        myGridLayout.getViewTreeObserver().addOnGlobalLayoutListener(
+        gl_game_grid.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener(){
 
                     @Override
@@ -77,17 +97,17 @@ public class GameAndChatActivity extends AppCompatActivity {
                         int pLength;
                         final int MARGIN = 5;
 
-                        int pWidth = myGridLayout.getWidth();
-                        int pHeight = myGridLayout.getHeight();
-                        int numOfCol = myGridLayout.getColumnCount();
-                        int numOfRow = myGridLayout.getRowCount();
+                        int pWidth = gl_game_grid.getWidth();
+                        int pHeight = gl_game_grid.getHeight();
+                        int numOfCol = gl_game_grid.getColumnCount();
+                        int numOfRow = gl_game_grid.getRowCount();
 
-                        //Set myGridLayout equal width and height
+                        //Set gl_game_grid equal width and height
                         pLength = Math.min(pWidth, pHeight);
-                        ViewGroup.LayoutParams pParams = myGridLayout.getLayoutParams();
+                        ViewGroup.LayoutParams pParams = gl_game_grid.getLayoutParams();
                         pParams.width = pLength;
                         pParams.height = pLength;
-                        myGridLayout.setLayoutParams(pParams);
+                        gl_game_grid.setLayoutParams(pParams);
 
                         int w = pLength/numOfCol; //pWidth/numOfCol;
                         int h = pLength/numOfRow; //pHeight/numOfRow;
@@ -104,7 +124,7 @@ public class GameAndChatActivity extends AppCompatActivity {
                         }
 
 
-                        myGridLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        gl_game_grid.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     }});
     }
 }

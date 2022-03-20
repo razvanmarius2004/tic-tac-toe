@@ -10,6 +10,7 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import ro.randr.tictactoe.Models.DeviceModel;
@@ -20,11 +21,11 @@ import ro.randr.tictactoe.Utils.ConnectionUtils;
 public class RecycleViewDevicesAdapter extends RecyclerView.Adapter<RecycleViewDevicesAdapter.RecycleViewHolder> {
 
     private List<DeviceModel> devices;
-    private Context mContext;
+    private WeakReference<Context> mWeakRef;
 
-    public RecycleViewDevicesAdapter(Context context, List<DeviceModel> devices) {
+    public RecycleViewDevicesAdapter(WeakReference<Context> mWeakRef, List<DeviceModel> devices) {
         this.devices = devices;
-        this.mContext = context;
+        this.mWeakRef = mWeakRef;
     }
 
     public void addToDataSet(DeviceModel device) {
@@ -55,7 +56,7 @@ public class RecycleViewDevicesAdapter extends RecyclerView.Adapter<RecycleViewD
         iv_connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ConnectionUtils.RequestConnection(mContext, devices.get(position));
+                ConnectionUtils.RequestConnection(mWeakRef.get(), devices.get(position));
             }
         });
 

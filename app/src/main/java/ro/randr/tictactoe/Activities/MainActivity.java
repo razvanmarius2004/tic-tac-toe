@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatEditText et_username;
     private RecyclerView rv_devices;
     public static RecycleViewDevicesAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     public static List<DeviceModel> devices = new ArrayList<>();
     private static final int REQUEST_PERMISSIONS = 1;
 
@@ -68,11 +68,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         rv_devices.setHasFixedSize(true);
-        mLayoutManager = new GridLayoutManager(this, 1);
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 1);
         rv_devices.setLayoutManager(mLayoutManager);
         rv_devices.setItemAnimator(new DefaultItemAnimator());
 
-        mAdapter = new RecycleViewDevicesAdapter(this, devices);
+        mAdapter = new RecycleViewDevicesAdapter(new WeakReference<>(this),devices);
         rv_devices.setAdapter(mAdapter);
 
     }
