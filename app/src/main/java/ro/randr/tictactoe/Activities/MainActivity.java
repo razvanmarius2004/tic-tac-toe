@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,8 +32,11 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatButton btn_start_discovery;
     private AppCompatButton btn_start_advertising;
     private AppCompatImageView iv_edit_username;
+    private AppCompatImageView iv_cancel;
+    private AppCompatImageView iv_done;
     private AppCompatEditText et_username;
     private RecyclerView rv_devices;
+    public static String username;
     public static RecycleViewDevicesAdapter mAdapter;
     public static List<DeviceModel> devices = new ArrayList<>();
     private static final int REQUEST_PERMISSIONS = 1;
@@ -40,14 +45,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getUsername();
         getViews();
         setViews();
+    }
+
+    private void getUsername() {
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        username = sharedPref.getString(getString(R.string.username), getString(R.string.default_username));
     }
 
     private void getViews() {
         btn_start_discovery = findViewById(R.id.btn_start_discovery);
         btn_start_advertising = findViewById(R.id.btn_start_advertising);
         iv_edit_username = findViewById(R.id.iv_edit_username);
+        iv_cancel = findViewById(R.id.iv_cancel);
+        iv_done = findViewById(R.id.iv_done);
         et_username = findViewById(R.id.et_username);
         rv_devices = findViewById(R.id.rv_devices);
     }
@@ -67,6 +80,34 @@ public class MainActivity extends AppCompatActivity {
                 startAdvertising();
             }
         });
+
+        iv_edit_username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                modifyUsername();
+            }
+        });
+
+        iv_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cancelModifyUsername();
+            }
+        });
+
+        iv_done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setUsername();
+            }
+        });
+
+        et_username.setText(username);
+        et_username.setEnabled(false);
+
+        iv_done.setVisibility(View.INVISIBLE);
+        iv_cancel.setVisibility(View.INVISIBLE);
+
         rv_devices.setHasFixedSize(true);
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 1);
         rv_devices.setLayoutManager(mLayoutManager);
@@ -75,6 +116,31 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new RecycleViewDevicesAdapter(new WeakReference<>(this),devices);
         rv_devices.setAdapter(mAdapter);
 
+    }
+
+    private void modifyUsername() {
+        et_username.setEnabled(true);
+        iv_done.setVisibility(View.VISIBLE);
+        iv_cancel.setVisibility(View.VISIBLE);
+    }
+
+    private void cancelModifyUsername() {
+        et_username.setText(username);
+        et_username.setEnabled(false);
+        iv_done.setVisibility(View.INVISIBLE);
+        iv_cancel.setVisibility(View.INVISIBLE);
+    }
+
+    private void setUsername() {
+        username = et_username.getText().toString();
+
+        et_username.setEnabled(false);
+        iv_done.setVisibility(View.INVISIBLE);
+        iv_cancel.setVisibility(View.INVISIBLE);
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.username), username);
+        editor.apply();
     }
 
     private void startDiscovery() {

@@ -1,17 +1,20 @@
 package ro.randr.tictactoe.Activities;
 
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.GridLayout;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.graphics.Color;
-import android.os.Bundle;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.GridLayout;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -32,6 +35,7 @@ public class GameAndChatActivity extends AppCompatActivity {
     public static RecycleViewChatAdapter mAdapter;
     private AppCompatEditText et_message;
     private AppCompatImageView iv_send;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,12 +53,13 @@ public class GameAndChatActivity extends AppCompatActivity {
 
     private void setViews() {
         iv_send.setOnClickListener(view -> {
-            ChatMessageModel chatMessageModel = new ChatMessageModel(ConnectionUtils.username, et_message.getText().toString());
+            ChatMessageModel chatMessageModel = new ChatMessageModel(MainActivity.username, et_message.getText().toString(), true);
             MessageModel messageModel = new MessageModel(chatMessageModel, null);
             ConnectionUtils.SendMessage(getApplicationContext(), messageModel);
             mAdapter.addToDataSet(chatMessageModel);
             et_message.setText("");
         });
+        
         setGrid();
         setRecycleView();
     }
@@ -92,7 +97,7 @@ public class GameAndChatActivity extends AppCompatActivity {
         }
 
         gl_game_grid.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener(){
+                new ViewTreeObserver.OnGlobalLayoutListener() {
 
                     @Override
                     public void onGlobalLayout() {
@@ -112,23 +117,24 @@ public class GameAndChatActivity extends AppCompatActivity {
                         pParams.height = pLength;
                         gl_game_grid.setLayoutParams(pParams);
 
-                        int w = pLength/numOfCol; //pWidth/numOfCol;
-                        int h = pLength/numOfRow; //pHeight/numOfRow;
+                        int w = pLength / numOfCol; //pWidth/numOfCol;
+                        int h = pLength / numOfRow; //pHeight/numOfRow;
 
-                        for(int yPos=0; yPos<numOfRow; yPos++){
-                            for(int xPos=0; xPos<numOfCol; xPos++){
+                        for (int yPos = 0; yPos < numOfRow; yPos++) {
+                            for (int xPos = 0; xPos < numOfCol; xPos++) {
                                 GridLayout.LayoutParams params =
-                                        (GridLayout.LayoutParams)myViews[yPos*numOfCol + xPos].getLayoutParams();
-                                params.width = w - 2*MARGIN;
-                                params.height = h - 2*MARGIN;
+                                        (GridLayout.LayoutParams) myViews[yPos * numOfCol + xPos].getLayoutParams();
+                                params.width = w - 2 * MARGIN;
+                                params.height = h - 2 * MARGIN;
                                 params.setMargins(MARGIN, MARGIN, MARGIN, MARGIN);
-                                myViews[yPos*numOfCol + xPos].setLayoutParams(params);
+                                myViews[yPos * numOfCol + xPos].setLayoutParams(params);
                             }
                         }
 
 
                         gl_game_grid.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }});
+                    }
+                });
     }
 
     public static void ManageClickReceived(int x, int y) {

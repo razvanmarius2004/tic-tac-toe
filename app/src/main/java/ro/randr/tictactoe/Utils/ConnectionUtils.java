@@ -32,12 +32,9 @@ import ro.randr.tictactoe.Models.DeviceModel;
 import ro.randr.tictactoe.Models.MessageModel;
 
 public class ConnectionUtils {
-    public static final String username = "Razvan";
     private static String connectedEndPoint;
-    private static WeakReference<Context> sWeakRef;
     private static ConnectionLifecycleCallback connectionLifecycleCallback;
     private static EndpointDiscoveryCallback endpointDiscoveryCallback;
-    //private static Dialog dialog;
 
     static class ReceiveBytesPayloadListener extends PayloadCallback {
 
@@ -50,6 +47,7 @@ public class ConnectionUtils {
                 Gson g = new Gson();
                 MessageModel messageModel = g.fromJson(message, MessageModel.class);
                 if (messageModel.ChatMessageModel != null) {
+                    messageModel.ChatMessageModel.IsOwn = false;
                     GameAndChatActivity.mAdapter.addToDataSet(messageModel.ChatMessageModel);
                 }
                 if (messageModel.ClickMessageModel != null) {
@@ -82,7 +80,6 @@ public class ConnectionUtils {
     }
 
     private static void InitializeConnectionLifecycleCallback(Context context) {
-        sWeakRef = new WeakReference<>(context);
         connectionLifecycleCallback =
                 new ConnectionLifecycleCallback() {
                     @Override
@@ -137,7 +134,7 @@ public class ConnectionUtils {
                 new AdvertisingOptions.Builder().setStrategy(Strategy.P2P_POINT_TO_POINT).build();
         Nearby.getConnectionsClient(context)
                 .startAdvertising(
-                        username, context.getPackageName(), connectionLifecycleCallback, advertisingOptions)
+                        MainActivity.username, context.getPackageName(), connectionLifecycleCallback, advertisingOptions)
                 .addOnSuccessListener(
                         (Void unused) -> Toast.makeText(context, "Advertising started!", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(
@@ -161,7 +158,7 @@ public class ConnectionUtils {
 
     public static void RequestConnection(Context context, DeviceModel toDevice) {
         Nearby.getConnectionsClient(context)
-                .requestConnection(username, toDevice.EndpointId, connectionLifecycleCallback)
+                .requestConnection(MainActivity.username, toDevice.EndpointId, connectionLifecycleCallback)
                 .addOnSuccessListener(
                         (Void unused) -> {
                             // We successfully requested a connection. Now both sides

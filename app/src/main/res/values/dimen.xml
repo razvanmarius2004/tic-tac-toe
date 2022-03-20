@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="view_side_margin">40dp</dimen>
+    <dimen name="username_chat">18sp</dimen>
+    <dimen name="message_chat">16sp</dimen>
+
 
 </resources>

@@ -3,14 +3,26 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/border.xml" value="0.1375" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/button.xml" value="0.1675" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/button_focused.xml" value="0.1675" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/button_pressed.xml" value="0.1675" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/button_states.xml" value="0.1675" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/cancel.xml" value="0.1675" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/chat_bubble_green.xml" value="0.1625" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/chat_buble.xml" value="0.1625" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/circle.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/connect.xml" value="0.1675" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/done.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/edit_username.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/send.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/activity_game_and_chat.xml" value="0.136" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/activity_main.xml" value="0.23278985507246377" />
-        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/chat_cardview.xml" value="0.11354166666666667" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/chat1_cardview.xml" value="0.23278985507246377" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/chat_cardview.xml" value="0.2" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/devices_cardview.xml" value="0.23278985507246377" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/dialog.xml" value="0.23278985507246377" />
+        <entry key="..\:/Users/razvan.andrus/AppData/Local/Android/Sdk/platforms/android-31/data/res/drawable/btn_default.xml" value="0.1675" />
       </map>
     </option>
   </component>
