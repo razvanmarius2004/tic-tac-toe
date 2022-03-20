@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.GridLayout;
@@ -18,15 +17,16 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import ro.randr.tictactoe.Adapters.RecycleViewChatAdapter;
-import ro.randr.tictactoe.Adapters.RecycleViewDevicesAdapter;
 import ro.randr.tictactoe.Models.ChatMessageModel;
+import ro.randr.tictactoe.Models.ClickMessageModel;
+import ro.randr.tictactoe.Models.MessageModel;
 import ro.randr.tictactoe.R;
 import ro.randr.tictactoe.Utils.ConnectionUtils;
 import ro.randr.tictactoe.Views.GridLayoutItem;
 
 public class GameAndChatActivity extends AppCompatActivity {
 
-    private GridLayoutItem[] myViews;
+    private static GridLayoutItem[] myViews;
     private GridLayout gl_game_grid;
     private RecyclerView rv_chat_history;
     public static RecycleViewChatAdapter mAdapter;
@@ -48,14 +48,12 @@ public class GameAndChatActivity extends AppCompatActivity {
     }
 
     private void setViews() {
-        iv_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ChatMessageModel chatMessageModel = new ChatMessageModel(ConnectionUtils.username, et_message.getText().toString());
-                ConnectionUtils.SendMessage(getApplicationContext(), chatMessageModel);
-                mAdapter.addToDataSet(chatMessageModel);
-                et_message.setText("");
-            }
+        iv_send.setOnClickListener(view -> {
+            ChatMessageModel chatMessageModel = new ChatMessageModel(ConnectionUtils.username, et_message.getText().toString());
+            MessageModel messageModel = new MessageModel(chatMessageModel, null);
+            ConnectionUtils.SendMessage(getApplicationContext(), messageModel);
+            mAdapter.addToDataSet(chatMessageModel);
+            et_message.setText("");
         });
         setGrid();
         setRecycleView();
@@ -84,6 +82,9 @@ public class GameAndChatActivity extends AppCompatActivity {
                 tView.setOnClickListener(view -> {
                     GridLayoutItem g = (GridLayoutItem) view;
                     view.setBackgroundColor(Color.GREEN);
+                    ClickMessageModel clickMessageModel = new ClickMessageModel(g.x, g.y);
+                    MessageModel messageModel = new MessageModel(null, clickMessageModel);
+                    ConnectionUtils.SendMessage(getApplicationContext(), messageModel);
                 });
                 myViews[yPos * numOfCol + xPos] = tView;
                 gl_game_grid.addView(tView);
@@ -128,5 +129,14 @@ public class GameAndChatActivity extends AppCompatActivity {
 
                         gl_game_grid.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     }});
+    }
+
+    public static void ManageClickReceived(int x, int y) {
+        for (GridLayoutItem myView : myViews) {
+            if (myView.x == x && myView.y == y) {
+                myView.setBackgroundColor(Color.GREEN);
+                break;
+            }
+        }
     }
 }

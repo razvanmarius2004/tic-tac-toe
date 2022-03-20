@@ -29,9 +29,10 @@ import ro.randr.tictactoe.Activities.MainActivity;
 import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
 import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.DeviceModel;
+import ro.randr.tictactoe.Models.MessageModel;
 
 public class ConnectionUtils {
-    public static final String username = "Galaxy";
+    public static final String username = "Razvan";
     private static String connectedEndPoint;
     private static WeakReference<Context> sWeakRef;
     private static ConnectionLifecycleCallback connectionLifecycleCallback;
@@ -47,8 +48,13 @@ public class ConnectionUtils {
                 byte[] receivedBytes = payload.asBytes();
                 String message = new String(receivedBytes, Charset.defaultCharset());
                 Gson g = new Gson();
-                ChatMessageModel chatMessageModel = g.fromJson(message, ChatMessageModel.class);
-                GameAndChatActivity.mAdapter.addToDataSet(chatMessageModel);
+                MessageModel messageModel = g.fromJson(message, MessageModel.class);
+                if (messageModel.ChatMessageModel != null) {
+                    GameAndChatActivity.mAdapter.addToDataSet(messageModel.ChatMessageModel);
+                }
+                if (messageModel.ClickMessageModel != null) {
+                    GameAndChatActivity.ManageClickReceived(messageModel.ClickMessageModel.X, messageModel.ClickMessageModel.Y);
+                }
             }
         }
 
@@ -167,8 +173,8 @@ public class ConnectionUtils {
                         });
     }
 
-    public static void SendMessage(Context context, ChatMessageModel chatMessageModel) {
-        String sendInfo = new Gson().toJson(chatMessageModel);
+    public static void SendMessage(Context context, MessageModel messageModel) {
+        String sendInfo = new Gson().toJson(messageModel);
         byte[] bytes = sendInfo.getBytes(Charset.defaultCharset());
         Payload bytesPayload = Payload.fromBytes(bytes);
         Nearby.getConnectionsClient(context).sendPayload(connectedEndPoint, bytesPayload);
