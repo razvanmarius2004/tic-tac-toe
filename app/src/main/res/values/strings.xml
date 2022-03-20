@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Tic Tac Toe</string>
+    <string name="btn_start_discovery">START DISCOVERY</string>
+    <string name="btn_start_advertising">START ADVERTISING</string>
+    <string name="default_username">John</string>
+</resources>
