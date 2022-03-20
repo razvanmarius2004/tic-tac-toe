@@ -31,7 +31,7 @@ import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.DeviceModel;
 
 public class ConnectionUtils {
-    public static final String username = "Razvan";
+    public static final String username = "Galaxy";
     private static String connectedEndPoint;
     private static WeakReference<Context> sWeakRef;
     private static ConnectionLifecycleCallback connectionLifecycleCallback;

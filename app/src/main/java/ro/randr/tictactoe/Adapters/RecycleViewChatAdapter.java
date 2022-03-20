@@ -20,15 +20,24 @@ public class RecycleViewChatAdapter extends RecyclerView.Adapter<RecycleViewChat
 
     private List<ChatMessageModel> messages;
     private WeakReference<Context> mWeakRef;
+    private RecyclerView mRecyclerView;
 
     public RecycleViewChatAdapter(WeakReference<Context> mWeakRef, List<ChatMessageModel> messages) {
         this.messages = messages;
         this.mWeakRef = mWeakRef;
     }
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        mRecyclerView = recyclerView;
+    }
+
     public void addToDataSet(ChatMessageModel chatMessageModel) {
         messages.add(chatMessageModel);
         this.notifyDataSetChanged();
+        mRecyclerView.scrollToPosition(getItemCount() -1);
     }
 
 

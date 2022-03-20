@@ -51,7 +51,9 @@ public class GameAndChatActivity extends AppCompatActivity {
         iv_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ConnectionUtils.SendMessage(getApplicationContext(), new ChatMessageModel(ConnectionUtils.username, et_message.getText().toString()));
+                ChatMessageModel chatMessageModel = new ChatMessageModel(ConnectionUtils.username, et_message.getText().toString());
+                ConnectionUtils.SendMessage(getApplicationContext(), chatMessageModel);
+                mAdapter.addToDataSet(chatMessageModel);
                 et_message.setText("");
             }
         });
