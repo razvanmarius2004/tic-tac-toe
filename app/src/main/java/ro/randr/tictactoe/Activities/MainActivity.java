@@ -68,39 +68,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setViews() {
-        btn_start_discovery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startDiscovery();
-            }
-        });
-        btn_start_advertising.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startAdvertising();
-            }
-        });
+        btn_start_discovery.setOnClickListener(view -> startDiscovery());
+        btn_start_advertising.setOnClickListener(view -> startAdvertising());
 
-        iv_edit_username.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                modifyUsername();
-            }
-        });
+        iv_edit_username.setOnClickListener(view -> modifyUsername());
 
-        iv_cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cancelModifyUsername();
-            }
-        });
+        iv_cancel.setOnClickListener(view -> cancelModifyUsername());
 
-        iv_done.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setUsername();
-            }
-        });
+        iv_done.setOnClickListener(view -> setUsername());
 
         et_username.setText(username);
         et_username.setEnabled(false);

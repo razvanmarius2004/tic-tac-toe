@@ -30,8 +30,12 @@ import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
 import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.DeviceModel;
 import ro.randr.tictactoe.Models.MessageModel;
+import ro.randr.tictactoe.Models.TicTac;
 
 public class ConnectionUtils {
+    public static TicTac player = TicTac.TAC;
+    public static boolean isYourTurn = false;
+    private static WeakReference<Context> mWeakRef;
     private static String connectedEndPoint;
     private static ConnectionLifecycleCallback connectionLifecycleCallback;
     private static EndpointDiscoveryCallback endpointDiscoveryCallback;
@@ -51,7 +55,7 @@ public class ConnectionUtils {
                     GameAndChatActivity.mAdapter.addToDataSet(messageModel.ChatMessageModel);
                 }
                 if (messageModel.ClickMessageModel != null) {
-                    GameAndChatActivity.ManageClickReceived(messageModel.ClickMessageModel.X, messageModel.ClickMessageModel.Y);
+                    GameAndChatActivity.ManageClickReceived(messageModel.ClickMessageModel.X, messageModel.ClickMessageModel.Y, mWeakRef.get());
                 }
             }
         }
@@ -127,6 +131,9 @@ public class ConnectionUtils {
     }
 
     public static void StartAdvertising(Context context) {
+        if (mWeakRef == null) {
+            mWeakRef = new WeakReference<>(context);
+        }
         if (connectionLifecycleCallback == null) {
             InitializeConnectionLifecycleCallback(context);
         }
@@ -142,6 +149,9 @@ public class ConnectionUtils {
     }
 
     public static void StartDiscovery(Context context) {
+        if (mWeakRef == null) {
+            mWeakRef = new WeakReference<>(context);
+        }
         InitializeEndpointDiscoveryCallback();
         if (connectionLifecycleCallback == null) {
             InitializeConnectionLifecycleCallback(context);
@@ -157,6 +167,8 @@ public class ConnectionUtils {
     }
 
     public static void RequestConnection(Context context, DeviceModel toDevice) {
+        player = TicTac.TIC;
+        isYourTurn = true;
         Nearby.getConnectionsClient(context)
                 .requestConnection(MainActivity.username, toDevice.EndpointId, connectionLifecycleCallback)
                 .addOnSuccessListener(

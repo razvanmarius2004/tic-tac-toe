@@ -1,17 +1,24 @@
 package ro.randr.tictactoe.Activities;
 
+import android.app.ActionBar;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.GridLayout;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.constraintlayout.widget.Constraints;
+import androidx.core.view.ViewGroupCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +30,7 @@ import ro.randr.tictactoe.Adapters.RecycleViewChatAdapter;
 import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.ClickMessageModel;
 import ro.randr.tictactoe.Models.MessageModel;
+import ro.randr.tictactoe.Models.TicTac;
 import ro.randr.tictactoe.R;
 import ro.randr.tictactoe.Utils.ConnectionUtils;
 import ro.randr.tictactoe.Views.GridLayoutItem;
@@ -83,14 +91,9 @@ public class GameAndChatActivity extends AppCompatActivity {
                 GridLayoutItem tView = new GridLayoutItem(this);
                 tView.x = xPos;
                 tView.y = yPos;
+                tView.type = TicTac.NONE;
                 tView.setBackgroundColor(Color.RED);
-                tView.setOnClickListener(view -> {
-                    GridLayoutItem g = (GridLayoutItem) view;
-                    view.setBackgroundColor(Color.GREEN);
-                    ClickMessageModel clickMessageModel = new ClickMessageModel(g.x, g.y);
-                    MessageModel messageModel = new MessageModel(null, clickMessageModel);
-                    ConnectionUtils.SendMessage(getApplicationContext(), messageModel);
-                });
+                tView.setOnClickListener(this::manageClick);
                 myViews[yPos * numOfCol + xPos] = tView;
                 gl_game_grid.addView(tView);
             }
@@ -137,12 +140,37 @@ public class GameAndChatActivity extends AppCompatActivity {
                 });
     }
 
-    public static void ManageClickReceived(int x, int y) {
+    public static void ManageClickReceived(int x, int y, Context context) {
         for (GridLayoutItem myView : myViews) {
             if (myView.x == x && myView.y == y) {
-                myView.setBackgroundColor(Color.GREEN);
+
+                if (ConnectionUtils.player == TicTac.TAC) {
+                    myView.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.tic));
+                    myView.type = TicTac.TIC;
+                } else {
+                    myView.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.tac));
+                    myView.type = TicTac.TAC;
+                }
+                ConnectionUtils.isYourTurn = true;
                 break;
             }
+        }
+    }
+
+    private void manageClick(View view) {
+        GridLayoutItem g = (GridLayoutItem) view;
+        if (ConnectionUtils.isYourTurn && g.type == TicTac.NONE) {
+            ClickMessageModel clickMessageModel = new ClickMessageModel(g.x, g.y);
+            MessageModel messageModel = new MessageModel(null, clickMessageModel);
+            if (ConnectionUtils.player == TicTac.TIC) {
+                g.setImageDrawable(AppCompatResources.getDrawable(getApplicationContext(), R.drawable.tic));
+                g.type = TicTac.TIC;
+            } else {
+                g.setImageDrawable(AppCompatResources.getDrawable(getApplicationContext(), R.drawable.tac));
+                g.type = TicTac.TAC;
+            }
+            ConnectionUtils.SendMessage(getApplicationContext(), messageModel);
+            ConnectionUtils.isYourTurn = false;
         }
     }
 }
