@@ -7,6 +7,19 @@
     tools:context=".Activities.GameAndChatActivity"
     android:background="@color/background">
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:textSize="@dimen/username_chat"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/gl_grid">
+
+    </androidx.appcompat.widget.AppCompatTextView>
+
     <GridLayout
         android:id="@+id/gl_grid"
         android:layout_width="match_parent"
@@ -15,11 +28,12 @@
         android:columnCount="3"
         android:rowCount="3"
         android:layout_gravity="center"
+        android:layout_marginTop="15dp"
         android:layout_marginStart="@dimen/view_side_margin"
         android:layout_marginEnd="@dimen/view_side_margin"
         android:background="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/tv_info" >
     </GridLayout>
 
     <androidx.appcompat.widget.AppCompatEditText

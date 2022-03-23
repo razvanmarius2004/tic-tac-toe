@@ -54,9 +54,6 @@ public class Dialog extends AlertDialog {
     }
 
     private void setViews() {
-        tv_text.setText(mMessage);
-        btn_negative.setText("NO");
-        btn_positive.setText("YES");
         btn_positive.setOnClickListener(view -> {
             mClickListener.onPositive();
             Dialog.this.dismiss();
@@ -65,5 +62,55 @@ public class Dialog extends AlertDialog {
             mClickListener.onNegative();
             Dialog.this.dismiss();
         });
+
+        switch (mDialogType) {
+            case "disclaimer":
+                setViewsForDisclaimer();
+                break;
+            case "accept_connection":
+                setViewsForConnection();
+                break;
+
+            case "you_won":
+                setViewsForWin();
+                break;
+            case "you_lost":
+                setViewsForLose();
+                break;
+            case "draw":
+                setViewsForDraw();
+                break;
+        }
+
+    }
+
+    private void setViewsForDisclaimer() {
+        tv_text.setText(mMessage);
+        btn_negative.setText(R.string.button_no);
+        btn_positive.setText(R.string.button_yes);
+    }
+
+    private void setViewsForConnection() {
+        tv_text.setText(mMessage);
+        btn_negative.setText(R.string.button_no);
+        btn_positive.setText(R.string.button_yes);
+    }
+
+    private void setViewsForWin() {
+        tv_text.setText(R.string.you_won);
+        btn_negative.setText(R.string.button_no);
+        btn_positive.setText(R.string.button_yes);
+    }
+
+    private void setViewsForLose() {
+        tv_text.setText(R.string.you_lose);
+        btn_negative.setText(R.string.button_no);
+        btn_positive.setText(R.string.button_yes);
+    }
+
+    private void setViewsForDraw() {
+        tv_text.setText(R.string.draw);
+        btn_negative.setText(R.string.button_no);
+        btn_positive.setText(R.string.button_yes);
     }
 }

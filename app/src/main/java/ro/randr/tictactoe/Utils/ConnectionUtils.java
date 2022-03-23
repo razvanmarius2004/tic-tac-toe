@@ -27,7 +27,6 @@ import java.nio.charset.Charset;
 import ro.randr.tictactoe.Activities.GameAndChatActivity;
 import ro.randr.tictactoe.Activities.MainActivity;
 import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
-import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.DeviceModel;
 import ro.randr.tictactoe.Models.MessageModel;
 import ro.randr.tictactoe.Models.TicTac;
@@ -35,6 +34,8 @@ import ro.randr.tictactoe.Models.TicTac;
 public class ConnectionUtils {
     public static TicTac player = TicTac.TAC;
     public static boolean isYourTurn = false;
+    public static boolean areYouReady = false;
+    public static boolean isOpponentReady = false;
     private static WeakReference<Context> mWeakRef;
     private static String connectedEndPoint;
     private static ConnectionLifecycleCallback connectionLifecycleCallback;
@@ -56,6 +57,15 @@ public class ConnectionUtils {
                 }
                 if (messageModel.ClickMessageModel != null) {
                     GameAndChatActivity.ManageClickReceived(messageModel.ClickMessageModel.X, messageModel.ClickMessageModel.Y, mWeakRef.get());
+                }
+
+                if (messageModel.IsOpponentReady != null) {
+                    isOpponentReady = true;
+                    if (isYourTurn) {
+                        GameAndChatActivity.setInfo("Your turn");
+                    } else {
+                        GameAndChatActivity.setInfo("Opponents turn");
+                    }
                 }
             }
         }
@@ -93,6 +103,7 @@ public class ConnectionUtils {
                             public void onPositive() {
                                 Nearby.getConnectionsClient(context)
                                         .acceptConnection(endpointId,  new ReceiveBytesPayloadListener());
+                                areYouReady = true;
                                 Intent intent = new Intent(context, GameAndChatActivity.class);
                                 context.startActivity(intent);
                             }
@@ -111,6 +122,7 @@ public class ConnectionUtils {
                             case ConnectionsStatusCodes.STATUS_OK:
                                 Toast.makeText(context, "Connected to : " + endpointId, Toast.LENGTH_SHORT).show();
                                 connectedEndPoint = endpointId;
+                                isOpponentReady = true;
                                 break;
                             case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED:
                                 Toast.makeText(context, "Refused to: " + endpointId, Toast.LENGTH_SHORT).show();
@@ -169,6 +181,7 @@ public class ConnectionUtils {
     public static void RequestConnection(Context context, DeviceModel toDevice) {
         player = TicTac.TIC;
         isYourTurn = true;
+        GameAndChatActivity.setInfo("Your turn");
         Nearby.getConnectionsClient(context)
                 .requestConnection(MainActivity.username, toDevice.EndpointId, connectionLifecycleCallback)
                 .addOnSuccessListener(
