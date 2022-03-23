@@ -21,23 +21,19 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
 import com.google.gson.Gson;
 
-import java.lang.ref.WeakReference;
 import java.nio.charset.Charset;
 
 import ro.randr.tictactoe.Activities.GameAndChatActivity;
 import ro.randr.tictactoe.Activities.MainActivity;
 import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
+import ro.randr.tictactoe.Models.BoardState;
 import ro.randr.tictactoe.Models.DeviceModel;
+import ro.randr.tictactoe.Models.GameState;
 import ro.randr.tictactoe.Models.MessageModel;
 import ro.randr.tictactoe.Models.TicTac;
 
 public class ConnectionUtils {
-    public static TicTac player = TicTac.TAC;
-    public static boolean isYourTurn = false;
-    public static boolean areYouReady = false;
-    public static boolean isOpponentReady = false;
-    private static WeakReference<Context> mWeakRef;
-    private static String connectedEndPoint;
+
     private static ConnectionLifecycleCallback connectionLifecycleCallback;
     private static EndpointDiscoveryCallback endpointDiscoveryCallback;
 
@@ -56,16 +52,19 @@ public class ConnectionUtils {
                     GameAndChatActivity.mAdapter.addToDataSet(messageModel.ChatMessageModel);
                 }
                 if (messageModel.ClickMessageModel != null) {
-                    GameAndChatActivity.ManageClickReceived(messageModel.ClickMessageModel.X, messageModel.ClickMessageModel.Y, mWeakRef.get());
+                    GameState.getInstance().setYourTurn(true);
+                    if (GameState.getInstance().getPlayerType() == TicTac.TIC)
+                    {
+                        BoardState.getInstance().modifyCell(messageModel.ClickMessageModel.Y, messageModel.ClickMessageModel.X,TicTac.TAC);
+                    } else {
+                        BoardState.getInstance().modifyCell(messageModel.ClickMessageModel.Y, messageModel.ClickMessageModel.X,TicTac.TIC);
+                    }
+
+                    BoardState.getInstance().checkAndSetWinner();
                 }
 
                 if (messageModel.IsOpponentReady != null) {
-                    isOpponentReady = true;
-                    if (isYourTurn) {
-                        GameAndChatActivity.setInfo("Your turn");
-                    } else {
-                        GameAndChatActivity.setInfo("Opponents turn");
-                    }
+                    GameState.getInstance().setOpponentReady(true);
                 }
             }
         }
@@ -103,7 +102,7 @@ public class ConnectionUtils {
                             public void onPositive() {
                                 Nearby.getConnectionsClient(context)
                                         .acceptConnection(endpointId,  new ReceiveBytesPayloadListener());
-                                areYouReady = true;
+                                GameState.getInstance().setAreYouReady(true);
                                 Intent intent = new Intent(context, GameAndChatActivity.class);
                                 context.startActivity(intent);
                             }
@@ -121,8 +120,8 @@ public class ConnectionUtils {
                         switch (result.getStatus().getStatusCode()) {
                             case ConnectionsStatusCodes.STATUS_OK:
                                 Toast.makeText(context, "Connected to : " + endpointId, Toast.LENGTH_SHORT).show();
-                                connectedEndPoint = endpointId;
-                                isOpponentReady = true;
+                                GameState.getInstance().setConnectedEndPoint(endpointId);
+                                GameState.getInstance().setOpponentReady(true);
                                 break;
                             case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED:
                                 Toast.makeText(context, "Refused to: " + endpointId, Toast.LENGTH_SHORT).show();
@@ -143,9 +142,6 @@ public class ConnectionUtils {
     }
 
     public static void StartAdvertising(Context context) {
-        if (mWeakRef == null) {
-            mWeakRef = new WeakReference<>(context);
-        }
         if (connectionLifecycleCallback == null) {
             InitializeConnectionLifecycleCallback(context);
         }
@@ -161,9 +157,6 @@ public class ConnectionUtils {
     }
 
     public static void StartDiscovery(Context context) {
-        if (mWeakRef == null) {
-            mWeakRef = new WeakReference<>(context);
-        }
         InitializeEndpointDiscoveryCallback();
         if (connectionLifecycleCallback == null) {
             InitializeConnectionLifecycleCallback(context);
@@ -179,9 +172,8 @@ public class ConnectionUtils {
     }
 
     public static void RequestConnection(Context context, DeviceModel toDevice) {
-        player = TicTac.TIC;
-        isYourTurn = true;
-        GameAndChatActivity.setInfo("Your turn");
+        GameState.getInstance().setPlayerType(TicTac.TIC);
+        GameState.getInstance().setYourTurn(true);
         Nearby.getConnectionsClient(context)
                 .requestConnection(MainActivity.username, toDevice.EndpointId, connectionLifecycleCallback)
                 .addOnSuccessListener(
@@ -199,7 +191,7 @@ public class ConnectionUtils {
         String sendInfo = new Gson().toJson(messageModel);
         byte[] bytes = sendInfo.getBytes(Charset.defaultCharset());
         Payload bytesPayload = Payload.fromBytes(bytes);
-        Nearby.getConnectionsClient(context).sendPayload(connectedEndPoint, bytesPayload);
+        Nearby.getConnectionsClient(context).sendPayload(GameState.getInstance().getConnectedEndPoint(), bytesPayload);
     }
 
 }

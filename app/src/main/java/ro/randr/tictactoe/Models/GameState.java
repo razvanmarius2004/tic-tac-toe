@@ -66,12 +66,22 @@ public class GameState {
 
     private void init(TicTac you) {
         playerType = you;
-        isYourTurn = false;
+        if (you == TicTac.TIC) {
+            isYourTurn = true;
+        } else {
+            isYourTurn = false;
+        }
         areYouReady = false;
         isOpponentReady = false;
     }
 
     public void reInit(TicTac you) {
-        init(you);
+        playerType = you;
+        if (you == TicTac.TIC) {
+            isYourTurn = true;
+        } else {
+            isYourTurn = false;
+        }
+        areYouReady = false;
     }
 }

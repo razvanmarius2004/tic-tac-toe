@@ -18,36 +18,45 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 import ro.randr.tictactoe.Adapters.RecycleViewChatAdapter;
 import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
+import ro.randr.tictactoe.Models.BoardState;
+import ro.randr.tictactoe.Models.CellModel;
 import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.ClickMessageModel;
+import ro.randr.tictactoe.Models.GameState;
 import ro.randr.tictactoe.Models.MessageModel;
 import ro.randr.tictactoe.Models.TicTac;
 import ro.randr.tictactoe.R;
 import ro.randr.tictactoe.Utils.ConnectionUtils;
 import ro.randr.tictactoe.Utils.Dialog;
+import ro.randr.tictactoe.Utils.WinType;
 import ro.randr.tictactoe.Utils.Winner;
 import ro.randr.tictactoe.Views.GridLayoutItem;
 
-public class GameAndChatActivity extends AppCompatActivity {
+public class GameAndChatActivity extends AppCompatActivity implements Observer {
 
-    private static GridLayoutItem[][] myViews;
-    private static GridLayout gl_game_grid;
-    private static WeakReference<Context> mWeakRef;
+    private GridLayoutItem[][] myViews;
+    private GridLayout gl_game_grid;
     private RecyclerView rv_chat_history;
     public static RecycleViewChatAdapter mAdapter;
     private AppCompatEditText et_message;
     private AppCompatImageView iv_send;
-    private static AppCompatTextView tv_info;
+    private AppCompatTextView tv_info;
+
+    private Observable boardStateObservable;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_and_chat);
-        mWeakRef = new WeakReference<>(this);
+
+        boardStateObservable = BoardState.getInstance();
+        boardStateObservable.addObserver(this);
         getViews();
         setViews();
     }
@@ -68,7 +77,7 @@ public class GameAndChatActivity extends AppCompatActivity {
             mAdapter.addToDataSet(chatMessageModel);
             et_message.setText("");
         });
-        
+
         setGrid();
         setRecycleView();
     }
@@ -92,7 +101,6 @@ public class GameAndChatActivity extends AppCompatActivity {
                 GridLayoutItem tView = new GridLayoutItem(this);
                 tView.x = xPos;
                 tView.y = yPos;
-                tView.type = TicTac.NONE;
                 tView.setBackgroundColor(getColor(R.color.board_background));
                 tView.setOnClickListener(this::manageClick);
                 myViews[yPos][xPos] = tView;
@@ -141,219 +149,72 @@ public class GameAndChatActivity extends AppCompatActivity {
                 });
     }
 
-    public static void ManageClickReceived(int x, int y, Context context) {
-        if (ConnectionUtils.player == TicTac.TAC) {
-            myViews[y][x].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.tic));
-            myViews[y][x].type = TicTac.TIC;
-        } else {
-            myViews[y][x].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.tac));
-            myViews[y][x].type = TicTac.TAC;
-        }
-        ConnectionUtils.isYourTurn = true;
-        setInfo("Your turn");
-        Winner winner = getWinType(context);
-        if (winner != Winner.NONE) {
-            showEndgameDialog(mWeakRef.get(), winner);
-            setEndGame();
-        }
-
-    }
-
-    private static void setEndGame() {
-        ConnectionUtils.isOpponentReady = false;
-        ConnectionUtils.areYouReady = false;
-    }
-
     private void manageClick(View view) {
         GridLayoutItem g = (GridLayoutItem) view;
-        if (ConnectionUtils.isYourTurn && g.type == TicTac.NONE && ConnectionUtils.areYouReady && ConnectionUtils.isOpponentReady) {
+        boolean isYourTurn = GameState.getInstance().isYourTurn();
+        TicTac type = BoardState.getInstance().getBoard()[g.y][g.x].getType();
+        boolean areYouReady = GameState.getInstance().isAreYouReady();
+        boolean isOpponentReady = GameState.getInstance().isOpponentReady();
+
+        if (isYourTurn && type == TicTac.NONE && areYouReady && isOpponentReady) {
             ClickMessageModel clickMessageModel = new ClickMessageModel(g.x, g.y);
             MessageModel messageModel = new MessageModel(null, clickMessageModel, null);
-            if (ConnectionUtils.player == TicTac.TIC) {
-                g.setImageDrawable(AppCompatResources.getDrawable(getApplicationContext(), R.drawable.tic));
-                g.type = TicTac.TIC;
-            } else {
-                g.setImageDrawable(AppCompatResources.getDrawable(getApplicationContext(), R.drawable.tac));
-                g.type = TicTac.TAC;
-            }
-            ConnectionUtils.SendMessage(getApplicationContext(), messageModel);
-            ConnectionUtils.isYourTurn = false;
+            ConnectionUtils.SendMessage(this, messageModel);
+            GameState.getInstance().setYourTurn(false);
+            BoardState.getInstance().modifyCell(g.y, g.x, GameState.getInstance().getPlayerType());
             setInfo("Opponents turn");
-            Winner winner = getWinType(this);
-            if (winner != Winner.NONE) {
-                showEndgameDialog(this, winner);
-                setEndGame();
-            }
+            BoardState.getInstance().checkAndSetWinner();
+        }
+    }
+    public void setInfo(String info) {
+        if (tv_info != null) {
+            tv_info.setText(info);
         }
     }
 
-    private static Winner getWinType(Context context) {
-        Winner winner = Winner.NONE;
-        if (myViews[0][0].type == myViews[0][1].type && myViews[0][1].type == myViews[0][2].type) {
-            switch (myViews[0][0].type) {
-                case TIC:
-                    myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    winner = Winner.TIC;
-                    return winner;
-                case TAC:
-                    myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    winner = Winner.TAC;
-                    return winner;
-            }
-        }
-        if (myViews[1][0].type == myViews[1][1].type && myViews[1][1].type == myViews[1][2].type) {
-            switch (myViews[1][0].type) {
-                case TIC:
-                    myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    winner = Winner.TIC;
-                    return winner;
-
-                case TAC:
-                    myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    winner = Winner.TAC;
-                    return winner;
-            }
-        }
-        if (myViews[2][0].type == myViews[2][1].type && myViews[2][1].type == myViews[2][2].type) {
-            switch (myViews[2][0].type) {
-                case TIC:
-                    myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    winner = Winner.TIC;
-                    return winner;
-                case TAC:
-                    myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    winner = Winner.TAC;
-                    return winner;
-            }
-        }
-        if (myViews[0][0].type == myViews[1][0].type && myViews[1][0].type == myViews[2][0].type) {
-            switch (myViews[0][0].type) {
-                case TIC:
-                    myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    winner = Winner.TIC;
-                    return winner;
-                case TAC:
-                    myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    winner = Winner.TAC;
-                    return winner;
-            }
-        }
-        if (myViews[0][1].type == myViews[1][1].type && myViews[1][1].type == myViews[2][1].type) {
-            switch (myViews[0][1].type) {
-                case TIC:
-                    myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    winner = Winner.TIC;
-                    return winner;
-                case TAC:
-                    myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    winner = Winner.TAC;
-                    return winner;
-            }
-        }
-        if (myViews[0][2].type == myViews[1][2].type && myViews[1][2].type == myViews[2][2].type) {
-            switch (myViews[0][2].type) {
-                case TIC:
-                    myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    winner = Winner.TIC;
-                    return winner;
-                case TAC:
-                    myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    winner = Winner.TAC;
-                    return winner;
-            }
-        }
-        if (myViews[0][0].type == myViews[1][1].type && myViews[1][1].type == myViews[2][2].type) {
-            switch (myViews[0][0].type) {
-                case TIC:
-                    myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_left_down_right));
-                    myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_left_down_right));
-                    myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_left_down_right));
-                    winner = Winner.TIC;
-                    return winner;
-                case TAC:
-                    myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_left_down_right));
-                    myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_left_down_right));
-                    myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_left_down_right));
-                    winner = Winner.TAC;
-                    return winner;
-            }
-        }
-        if (myViews[2][0].type == myViews[1][1].type && myViews[1][1].type == myViews[0][2].type) {
-            switch (myViews[2][0].type) {
-                case TIC:
-                    myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_down_left_up_right));
-                    myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_down_left_up_right));
-                    myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_down_left_up_right));
-                    winner = Winner.TIC;
-                    return winner;
-                case TAC:
-                    myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_down_left_up_right));
-                    myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_down_left_up_right));
-                    myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_down_left_up_right));
-                    winner = Winner.TAC;
-                    return winner;
-            }
-        }
-        if (isDraw()) {
-            winner = Winner.DRAW;
-        }
-        return winner;
-    }
-
-    private static boolean isDraw() {
-        boolean foundOneEmpty = false;
+    private void recreateBoard() {
         for (int yPos = 0; yPos < myViews.length; yPos++) {
             for (int xPos = 0; xPos < myViews[yPos].length; xPos++) {
-                if (myViews[yPos][xPos].type == TicTac.NONE) {
-                    foundOneEmpty = true;
-                    return false;
-                }
+                myViews[yPos][xPos].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.background));
             }
         }
-        return true;
     }
 
-    private static void showEndgameDialog(Context context, Winner winner) {
+    @Override
+    public void update(Observable observable, Object o) {
+        if (observable instanceof BoardState) {
+            BoardState board = (BoardState) observable;
+            CellModel changedCell = board.getChangedCell();
+            if (changedCell != null) {
+                modifyViews(changedCell);
+            }
+
+            if (board.isGameOver()) {
+                setViewsForGameOver(board.getWinner(), board.getWinType());
+                createDialogForGameOver(board.getWinner());
+            }
+
+            if (GameState.getInstance().isYourTurn()) {
+                setInfo("Your turn");
+            } else {
+                setInfo("Opponent turn");
+            }
+        }
+    }
+
+    private void createDialogForGameOver(Winner winner) {
         Dialog dialog = null;
-        if (winner == Winner.TIC && ConnectionUtils.player == TicTac.TIC
-                || winner == Winner.TAC && ConnectionUtils.player == TicTac.TAC) {
-            dialog = new Dialog(context, "you_won", "", new TwoOptionsDialog() {
+        GameState gameState = GameState.getInstance();
+        if (gameState.getPlayerType() == TicTac.TIC && winner == Winner.TIC
+                || gameState.getPlayerType() == TicTac.TAC && winner == Winner.TAC) {
+            dialog = new Dialog(GameAndChatActivity.this, "you_won", "", new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
-                    ConnectionUtils.isYourTurn = false;
-                    ConnectionUtils.areYouReady = true;
-                    setInfo("Opponents turn");
-                    if (ConnectionUtils.isYourTurn) {
-                        ConnectionUtils.player = TicTac.TIC;
-                    } else {
-                        ConnectionUtils.player = TicTac.TAC;
-                    }
+                    BoardState.getInstance().reInitGame();
+                    gameState.reInit(TicTac.TAC);
+                    gameState.setAreYouReady(true);
+                    ConnectionUtils.SendMessage(getApplicationContext(), new MessageModel(null, null, true));
                     recreateBoard();
-                    ConnectionUtils.SendMessage(context, new MessageModel(null, null, true));
                 }
 
                 @Override
@@ -361,22 +222,18 @@ public class GameAndChatActivity extends AppCompatActivity {
 
                 }
             });
-        } else if ((winner == Winner.TIC && ConnectionUtils.player == TicTac.TAC
-                || winner == Winner.TAC && ConnectionUtils.player == TicTac.TIC)) {
-            //you lost
-            dialog = new Dialog(context, "you_lost", "", new TwoOptionsDialog() {
+        }
+
+        if (gameState.getPlayerType() == TicTac.TIC && winner == Winner.TAC
+                || gameState.getPlayerType() == TicTac.TAC && winner == Winner.TIC) {
+            dialog = new Dialog(GameAndChatActivity.this, "you_lost", "", new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
-                    ConnectionUtils.isYourTurn = true;
-                    ConnectionUtils.areYouReady = true;
-                    setInfo("Your turn");
-                    if (ConnectionUtils.isYourTurn) {
-                        ConnectionUtils.player = TicTac.TIC;
-                    } else {
-                        ConnectionUtils.player = TicTac.TAC;
-                    }
+                    BoardState.getInstance().reInitGame();
+                    gameState.reInit(TicTac.TIC);
+                    gameState.setAreYouReady(true);
+                    ConnectionUtils.SendMessage(getApplicationContext(), new MessageModel(null, null, true));
                     recreateBoard();
-                    ConnectionUtils.SendMessage(context, new MessageModel(null, null, true));
                 }
 
                 @Override
@@ -384,19 +241,20 @@ public class GameAndChatActivity extends AppCompatActivity {
 
                 }
             });
-        } else if (winner == Winner.DRAW) {
-            dialog = new Dialog(context, "draw", "", new TwoOptionsDialog() {
+        }
+        if (winner == Winner.DRAW) {
+            dialog = new Dialog(GameAndChatActivity.this, "draw", "", new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
-                    ConnectionUtils.areYouReady = true;
-                    if (ConnectionUtils.isYourTurn) {
-                        ConnectionUtils.player = TicTac.TIC;
+                    BoardState.getInstance().reInitGame();
+                    if (gameState.getPlayerType() == TicTac.TIC) {
+                        gameState.reInit(TicTac.TAC);
                     } else {
-                        ConnectionUtils.player = TicTac.TAC;
+                        gameState.reInit(TicTac.TIC);
                     }
+                    gameState.setAreYouReady(true);
+                    ConnectionUtils.SendMessage(getApplicationContext(), new MessageModel(null, null, true));
                     recreateBoard();
-                    ConnectionUtils.SendMessage(context, new MessageModel(null, null, true));
-
                 }
 
                 @Override
@@ -410,22 +268,134 @@ public class GameAndChatActivity extends AppCompatActivity {
         }
     }
 
-    public static void setInfo(String info) {
-        if (tv_info != null) {
-            tv_info.setText(info);
+    private void modifyViews(CellModel changedCell) {
+        if (changedCell.getType() == TicTac.TIC) {
+            myViews[changedCell.getY()][changedCell.getX()].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.tic));
+        } else if (changedCell.getType() == TicTac.TAC) {
+            myViews[changedCell.getY()][changedCell.getX()].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.tac));
         }
     }
 
-    private static void recreateBoard() {
-        for (int yPos = 0; yPos < myViews.length; yPos++) {
-            for (int xPos = 0; xPos < myViews[yPos].length; xPos++) {
-                myViews[yPos][xPos].setImageDrawable(AppCompatResources.getDrawable(mWeakRef.get(), R.drawable.background));
-                myViews[yPos][xPos].type = TicTac.NONE;
-                if (!ConnectionUtils.isOpponentReady) {
-                    setInfo("Waiting for opponent to be ready");
-                }
+    private void setViewsForGameOver(Winner winner, WinType winType) {
+        if (winner == Winner.TIC) {
+            if (winType == WinType.HORIZONTAL_0) {
+                myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                return;
+            }
+
+            if (winType == WinType.HORIZONTAL_1) {
+                myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                return;
+            }
+
+            if (winType == WinType.HORIZONTAL_2) {
+                myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_left_right));
+                return;
+            }
+
+            if (winType == WinType.VERTICAL_0) {
+                myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                return;
+            }
+
+            if (winType == WinType.VERTICAL_1) {
+                myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                return;
+            }
+
+            if (winType == WinType.VERTICAL_2) {
+                myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_dwon));
+                return;
+            }
+
+            if (winType == WinType.NW_TO_SE) {
+                myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_left_down_right));
+                myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_left_down_right));
+                myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_up_left_down_right));
+                return;
+            }
+
+            if (winType == WinType.SW_TO_NE) {
+                myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_down_left_up_right));
+                myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_down_left_up_right));
+                myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tic_cut_down_left_up_right));
+                return;
             }
         }
 
+        if (winner == Winner.TAC) {
+            if (winType == WinType.HORIZONTAL_0) {
+                myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                return;
+            }
+
+            if (winType == WinType.HORIZONTAL_1) {
+                myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                return;
+            }
+
+            if (winType == WinType.HORIZONTAL_2) {
+                myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_left_right));
+                return;
+            }
+
+            if (winType == WinType.VERTICAL_0) {
+                myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                return;
+            }
+
+            if (winType == WinType.VERTICAL_1) {
+                myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                return;
+            }
+
+            if (winType == WinType.VERTICAL_2) {
+                myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_dwon));
+                return;
+            }
+
+            if (winType == WinType.NW_TO_SE) {
+                myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_left_down_right));
+                myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_left_down_right));
+                myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_up_left_down_right));
+                return;
+            }
+
+            if (winType == WinType.SW_TO_NE) {
+                myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_down_left_up_right));
+                myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_down_left_up_right));
+                myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_tac_cut_down_left_up_right));
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        boardStateObservable.deleteObserver(this);
     }
 }
