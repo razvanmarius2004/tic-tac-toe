@@ -18,12 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
 
 import ro.randr.tictactoe.Adapters.RecycleViewChatAdapter;
 import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
-import ro.randr.tictactoe.Models.CellModel;
 import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.ClickMessageModel;
 import ro.randr.tictactoe.Models.MessageModel;
@@ -31,7 +28,7 @@ import ro.randr.tictactoe.Models.TicTac;
 import ro.randr.tictactoe.R;
 import ro.randr.tictactoe.Utils.ConnectionUtils;
 import ro.randr.tictactoe.Utils.Dialog;
-import ro.randr.tictactoe.Utils.WinType;
+import ro.randr.tictactoe.Utils.Winner;
 import ro.randr.tictactoe.Views.GridLayoutItem;
 
 public class GameAndChatActivity extends AppCompatActivity {
@@ -154,8 +151,8 @@ public class GameAndChatActivity extends AppCompatActivity {
         }
         ConnectionUtils.isYourTurn = true;
         setInfo("Your turn");
-        WinType winner = getWinType(context);
-        if (winner != WinType.NONE) {
+        Winner winner = getWinType(context);
+        if (winner != Winner.NONE) {
             showEndgameDialog(mWeakRef.get(), winner);
             setEndGame();
         }
@@ -182,29 +179,29 @@ public class GameAndChatActivity extends AppCompatActivity {
             ConnectionUtils.SendMessage(getApplicationContext(), messageModel);
             ConnectionUtils.isYourTurn = false;
             setInfo("Opponents turn");
-            WinType winner = getWinType(this);
-            if (winner != WinType.NONE) {
+            Winner winner = getWinType(this);
+            if (winner != Winner.NONE) {
                 showEndgameDialog(this, winner);
                 setEndGame();
             }
         }
     }
 
-    private static WinType getWinType(Context context) {
-        WinType winner = WinType.NONE;
+    private static Winner getWinType(Context context) {
+        Winner winner = Winner.NONE;
         if (myViews[0][0].type == myViews[0][1].type && myViews[0][1].type == myViews[0][2].type) {
             switch (myViews[0][0].type) {
                 case TIC:
                     myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
                     myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
                     myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    winner = WinType.TIC;
+                    winner = Winner.TIC;
                     return winner;
                 case TAC:
                     myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
                     myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
                     myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    winner = WinType.TAC;
+                    winner = Winner.TAC;
                     return winner;
             }
         }
@@ -214,14 +211,14 @@ public class GameAndChatActivity extends AppCompatActivity {
                     myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
                     myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
                     myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    winner = WinType.TIC;
+                    winner = Winner.TIC;
                     return winner;
 
                 case TAC:
                     myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
                     myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
                     myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    winner = WinType.TAC;
+                    winner = Winner.TAC;
                     return winner;
             }
         }
@@ -231,13 +228,13 @@ public class GameAndChatActivity extends AppCompatActivity {
                     myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
                     myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
                     myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_left_right));
-                    winner = WinType.TIC;
+                    winner = Winner.TIC;
                     return winner;
                 case TAC:
                     myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
                     myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
                     myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_left_right));
-                    winner = WinType.TAC;
+                    winner = Winner.TAC;
                     return winner;
             }
         }
@@ -247,13 +244,13 @@ public class GameAndChatActivity extends AppCompatActivity {
                     myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
                     myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
                     myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    winner = WinType.TIC;
+                    winner = Winner.TIC;
                     return winner;
                 case TAC:
                     myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
                     myViews[1][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
                     myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    winner = WinType.TAC;
+                    winner = Winner.TAC;
                     return winner;
             }
         }
@@ -263,13 +260,13 @@ public class GameAndChatActivity extends AppCompatActivity {
                     myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
                     myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
                     myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    winner = WinType.TIC;
+                    winner = Winner.TIC;
                     return winner;
                 case TAC:
                     myViews[0][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
                     myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
                     myViews[2][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    winner = WinType.TAC;
+                    winner = Winner.TAC;
                     return winner;
             }
         }
@@ -279,13 +276,13 @@ public class GameAndChatActivity extends AppCompatActivity {
                     myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
                     myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
                     myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_dwon));
-                    winner = WinType.TIC;
+                    winner = Winner.TIC;
                     return winner;
                 case TAC:
                     myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
                     myViews[1][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
                     myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_dwon));
-                    winner = WinType.TAC;
+                    winner = Winner.TAC;
                     return winner;
             }
         }
@@ -295,13 +292,13 @@ public class GameAndChatActivity extends AppCompatActivity {
                     myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_left_down_right));
                     myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_left_down_right));
                     myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_up_left_down_right));
-                    winner = WinType.TIC;
+                    winner = Winner.TIC;
                     return winner;
                 case TAC:
                     myViews[0][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_left_down_right));
                     myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_left_down_right));
                     myViews[2][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_up_left_down_right));
-                    winner = WinType.TAC;
+                    winner = Winner.TAC;
                     return winner;
             }
         }
@@ -311,18 +308,18 @@ public class GameAndChatActivity extends AppCompatActivity {
                     myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_down_left_up_right));
                     myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_down_left_up_right));
                     myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tic_cut_down_left_up_right));
-                    winner = WinType.TIC;
+                    winner = Winner.TIC;
                     return winner;
                 case TAC:
                     myViews[2][0].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_down_left_up_right));
                     myViews[1][1].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_down_left_up_right));
                     myViews[0][2].setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_tac_cut_down_left_up_right));
-                    winner = WinType.TAC;
+                    winner = Winner.TAC;
                     return winner;
             }
         }
         if (isDraw()) {
-            winner = WinType.DRAW;
+            winner = Winner.DRAW;
         }
         return winner;
     }
@@ -340,10 +337,10 @@ public class GameAndChatActivity extends AppCompatActivity {
         return true;
     }
 
-    private static void showEndgameDialog(Context context, WinType winner) {
+    private static void showEndgameDialog(Context context, Winner winner) {
         Dialog dialog = null;
-        if (winner == WinType.TIC && ConnectionUtils.player == TicTac.TIC
-                || winner == WinType.TAC && ConnectionUtils.player == TicTac.TAC) {
+        if (winner == Winner.TIC && ConnectionUtils.player == TicTac.TIC
+                || winner == Winner.TAC && ConnectionUtils.player == TicTac.TAC) {
             dialog = new Dialog(context, "you_won", "", new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
@@ -364,8 +361,8 @@ public class GameAndChatActivity extends AppCompatActivity {
 
                 }
             });
-        } else if ((winner == WinType.TIC && ConnectionUtils.player == TicTac.TAC
-                || winner == WinType.TAC && ConnectionUtils.player == TicTac.TIC)) {
+        } else if ((winner == Winner.TIC && ConnectionUtils.player == TicTac.TAC
+                || winner == Winner.TAC && ConnectionUtils.player == TicTac.TIC)) {
             //you lost
             dialog = new Dialog(context, "you_lost", "", new TwoOptionsDialog() {
                 @Override
@@ -387,7 +384,7 @@ public class GameAndChatActivity extends AppCompatActivity {
 
                 }
             });
-        } else if (winner == WinType.DRAW) {
+        } else if (winner == Winner.DRAW) {
             dialog = new Dialog(context, "draw", "", new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
