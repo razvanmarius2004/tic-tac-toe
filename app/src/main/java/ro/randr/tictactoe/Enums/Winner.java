@@ -1,4 +1,4 @@
-package ro.randr.tictactoe.Utils;
+package ro.randr.tictactoe.Enums;
 
 public enum Winner {
     NONE, TIC, TAC, DRAW

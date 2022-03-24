@@ -1,11 +1,11 @@
 package ro.randr.tictactoe.Activities;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.GridLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -23,18 +23,21 @@ import java.util.Observer;
 
 import ro.randr.tictactoe.Adapters.RecycleViewChatAdapter;
 import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
-import ro.randr.tictactoe.Models.BoardState;
 import ro.randr.tictactoe.Models.CellModel;
 import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.ClickMessageModel;
-import ro.randr.tictactoe.Models.GameState;
+import ro.randr.tictactoe.Models.IsGameOverModel;
+import ro.randr.tictactoe.Models.IsOpponentReady;
 import ro.randr.tictactoe.Models.MessageModel;
-import ro.randr.tictactoe.Models.TicTac;
+import ro.randr.tictactoe.Enums.TicTac;
+import ro.randr.tictactoe.Observables.ChatMessageObservable;
+import ro.randr.tictactoe.Observables.ConnectionStateObservable;
+import ro.randr.tictactoe.Observables.GameStateObservable;
 import ro.randr.tictactoe.R;
 import ro.randr.tictactoe.Utils.ConnectionUtils;
 import ro.randr.tictactoe.Utils.Dialog;
-import ro.randr.tictactoe.Utils.WinType;
-import ro.randr.tictactoe.Utils.Winner;
+import ro.randr.tictactoe.Enums.WinType;
+import ro.randr.tictactoe.Enums.Winner;
 import ro.randr.tictactoe.Views.GridLayoutItem;
 
 public class GameAndChatActivity extends AppCompatActivity implements Observer {
@@ -42,23 +45,32 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
     private GridLayoutItem[][] myViews;
     private GridLayout gl_game_grid;
     private RecyclerView rv_chat_history;
-    public static RecycleViewChatAdapter mAdapter;
+    private RecycleViewChatAdapter mAdapter;
     private AppCompatEditText et_message;
     private AppCompatImageView iv_send;
     private AppCompatTextView tv_info;
 
-    private Observable boardStateObservable;
+    private Observable gameStateObservable;
+    private Observable connectionStateObservable;
+    private Observable chatObservable;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_and_chat);
-
-        boardStateObservable = BoardState.getInstance();
-        boardStateObservable.addObserver(this);
+        addObservers();
         getViews();
         setViews();
+    }
+
+    private void addObservers() {
+        gameStateObservable = GameStateObservable.getInstance();
+        gameStateObservable.addObserver(this);
+        connectionStateObservable = ConnectionStateObservable.getInstance();
+        connectionStateObservable.addObserver(this);
+        chatObservable = ChatMessageObservable.getInstance();
+        chatObservable.addObserver(this);
     }
 
     private void getViews() {
@@ -74,7 +86,9 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
             ChatMessageModel chatMessageModel = new ChatMessageModel(MainActivity.username, et_message.getText().toString(), true);
             MessageModel messageModel = new MessageModel(chatMessageModel, null, null);
             ConnectionUtils.SendMessage(getApplicationContext(), messageModel);
-            mAdapter.addToDataSet(chatMessageModel);
+
+            //mAdapter.addToDataSet(chatMessageModel);
+            ChatMessageObservable.getInstance().addChatToList(chatMessageModel);
             et_message.setText("");
         });
 
@@ -151,21 +165,24 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
 
     private void manageClick(View view) {
         GridLayoutItem g = (GridLayoutItem) view;
-        boolean isYourTurn = GameState.getInstance().isYourTurn();
-        TicTac type = BoardState.getInstance().getBoard()[g.y][g.x].getType();
-        boolean areYouReady = GameState.getInstance().isAreYouReady();
-        boolean isOpponentReady = GameState.getInstance().isOpponentReady();
+
+        GameStateObservable boardState = GameStateObservable.getInstance();
+        boolean isYourTurn = boardState.isYourTurn();
+        TicTac type = boardState.getBoard()[g.y][g.x].getType();
+        boolean areYouReady = boardState.isAreYouReady();
+        boolean isOpponentReady = boardState.isOpponentReady();
 
         if (isYourTurn && type == TicTac.NONE && areYouReady && isOpponentReady) {
             ClickMessageModel clickMessageModel = new ClickMessageModel(g.x, g.y);
             MessageModel messageModel = new MessageModel(null, clickMessageModel, null);
             ConnectionUtils.SendMessage(this, messageModel);
-            GameState.getInstance().setYourTurn(false);
-            BoardState.getInstance().modifyCell(g.y, g.x, GameState.getInstance().getPlayerType());
+            boardState.setYourTurn(false);
+            boardState.modifyCell(g.y, g.x, boardState.getPlayerType());
             setInfo("Opponents turn");
-            BoardState.getInstance().checkAndSetWinner();
+            boardState.checkAndSetWinner();
         }
     }
+
     public void setInfo(String info) {
         if (tv_info != null) {
             tv_info.setText(info);
@@ -173,48 +190,94 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
     }
 
     private void recreateBoard() {
-        for (int yPos = 0; yPos < myViews.length; yPos++) {
-            for (int xPos = 0; xPos < myViews[yPos].length; xPos++) {
-                myViews[yPos][xPos].setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.background));
+        for (GridLayoutItem[] myView : myViews) {
+            for (GridLayoutItem gridLayoutItem : myView) {
+                gridLayoutItem.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.background));
             }
         }
     }
 
     @Override
     public void update(Observable observable, Object o) {
-        if (observable instanceof BoardState) {
-            BoardState board = (BoardState) observable;
-            CellModel changedCell = board.getChangedCell();
-            if (changedCell != null) {
-                modifyViews(changedCell);
+//        if (observable instanceof GameStateObservable) {
+//            GameStateObservable game = (GameStateObservable) observable;
+//
+//            if (game.isGameOver()) {
+//                setViewsForGameOver(game.getWinner(), game.getWinType());
+//                createDialogForGameOver(game.getWinner());
+//            }
+//
+//            if (game.isYourTurn()) {
+//                setInfo("Your turn");
+//            } else {
+//                setInfo("Opponent turn");
+//            }
+//        }
+
+        if (o instanceof IsGameOverModel) {
+            GameStateObservable game = GameStateObservable.getInstance();
+            IsGameOverModel isGameOver = (IsGameOverModel) o;
+            if (isGameOver.isGameOver()) {
+                setViewsForGameOver(game.getWinner(), game.getWinType());
+                createDialogForGameOver(game.getWinner());
             }
 
-            if (board.isGameOver()) {
-                setViewsForGameOver(board.getWinner(), board.getWinType());
-                createDialogForGameOver(board.getWinner());
-            }
-
-            if (GameState.getInstance().isYourTurn()) {
+            if (game.isYourTurn()) {
                 setInfo("Your turn");
             } else {
                 setInfo("Opponent turn");
             }
         }
+
+        if (o instanceof CellModel) {
+            CellModel changedCell = (CellModel) o;
+            modifyViews(changedCell);
+        }
+
+        if (o instanceof IsOpponentReady) {
+            IsOpponentReady isOpponentReady = (IsOpponentReady) o;
+            if (isOpponentReady.isOpponentReady()) {
+                if (GameStateObservable.getInstance().isYourTurn()) {
+                    setInfo("Your turn");
+                } else {
+                    setInfo("Opponent turn");
+                }
+            }
+        }
+
+        if (observable instanceof ConnectionStateObservable) {
+            ConnectionStateObservable connectionState = (ConnectionStateObservable) observable;
+            switch (connectionState.getConnectionState()) {
+                case STATUS_OK:
+                    Toast.makeText(this, "Connected to: " + connectionState.getEndPointId(), Toast.LENGTH_SHORT).show();
+                    break;
+                case STATUS_DISCONNECTED:
+                    Toast.makeText(this, "Disconnected from: " + connectionState.getEndPointId(), Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+
+        if (o instanceof ChatMessageModel) {
+            ChatMessageModel chat = (ChatMessageModel) o;
+            mAdapter.addToDataSet(chat);
+        }
     }
 
     private void createDialogForGameOver(Winner winner) {
         Dialog dialog = null;
-        GameState gameState = GameState.getInstance();
-        if (gameState.getPlayerType() == TicTac.TIC && winner == Winner.TIC
-                || gameState.getPlayerType() == TicTac.TAC && winner == Winner.TAC) {
+        GameStateObservable boardState = GameStateObservable.getInstance();
+        //   GameState gameState = GameState.getInstance();
+        if (boardState.getPlayerType() == TicTac.TIC && winner == Winner.TIC
+                || boardState.getPlayerType() == TicTac.TAC && winner == Winner.TAC) {
             dialog = new Dialog(GameAndChatActivity.this, "you_won", "", new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
-                    BoardState.getInstance().reInitGame();
-                    gameState.reInit(TicTac.TAC);
-                    gameState.setAreYouReady(true);
                     ConnectionUtils.SendMessage(getApplicationContext(), new MessageModel(null, null, true));
+                    boardState.reInitGame(TicTac.TAC, true);
                     recreateBoard();
+                    if (!boardState.isOpponentReady()) {
+                        setInfo("Waiting for opponent");
+                    }
                 }
 
                 @Override
@@ -224,16 +287,17 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
             });
         }
 
-        if (gameState.getPlayerType() == TicTac.TIC && winner == Winner.TAC
-                || gameState.getPlayerType() == TicTac.TAC && winner == Winner.TIC) {
+        if (boardState.getPlayerType() == TicTac.TIC && winner == Winner.TAC
+                || boardState.getPlayerType() == TicTac.TAC && winner == Winner.TIC) {
             dialog = new Dialog(GameAndChatActivity.this, "you_lost", "", new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
-                    BoardState.getInstance().reInitGame();
-                    gameState.reInit(TicTac.TIC);
-                    gameState.setAreYouReady(true);
                     ConnectionUtils.SendMessage(getApplicationContext(), new MessageModel(null, null, true));
+                    boardState.reInitGame(TicTac.TIC, true);
                     recreateBoard();
+                    if (!boardState.isOpponentReady()) {
+                        setInfo("Waiting for opponent");
+                    }
                 }
 
                 @Override
@@ -246,15 +310,21 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
             dialog = new Dialog(GameAndChatActivity.this, "draw", "", new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
-                    BoardState.getInstance().reInitGame();
-                    if (gameState.getPlayerType() == TicTac.TIC) {
-                        gameState.reInit(TicTac.TAC);
-                    } else {
-                        gameState.reInit(TicTac.TIC);
-                    }
-                    gameState.setAreYouReady(true);
                     ConnectionUtils.SendMessage(getApplicationContext(), new MessageModel(null, null, true));
+                    // GameStateObservable.getInstance().reInitGame();
+                    if (boardState.getPlayerType() == TicTac.TIC) {
+                        boardState.reInitGame(TicTac.TAC, true);
+                        // gameState.reInit(TicTac.TAC);
+                    } else {
+                        //  boardState.reInit(TicTac.TIC, true);
+                        boardState.reInitGame(TicTac.TIC, true);
+                    }
+                    // gameState.setAreYouReady(true);
+                  //  ConnectionUtils.SendMessage(getApplicationContext(), new MessageModel(null, null, true));
                     recreateBoard();
+                    if (!boardState.isOpponentReady()) {
+                        setInfo("Waiting for opponent");
+                    }
                 }
 
                 @Override
@@ -396,6 +466,8 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        boardStateObservable.deleteObserver(this);
+        gameStateObservable.deleteObserver(this);
+        connectionStateObservable.deleteObserver(this);
+        chatObservable.deleteObserver(this);
     }
 }

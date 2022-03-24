@@ -1,4 +1,4 @@
-package ro.randr.tictactoe.Models;
+package ro.randr.tictactoe.Enums;
 
 public enum TicTac {
     NONE, TIC, TAC

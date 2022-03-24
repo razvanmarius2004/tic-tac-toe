@@ -1,4 +1,4 @@
-package ro.randr.tictactoe.Utils;
+package ro.randr.tictactoe.Enums;
 
 public enum WinType {
     NONE,
@@ -10,5 +10,4 @@ public enum WinType {
     VERTICAL_2,
     NW_TO_SE,
     SW_TO_NE,
-
 }

@@ -1,7 +1,6 @@
 package ro.randr.tictactoe.Utils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,14 +22,16 @@ import com.google.gson.Gson;
 
 import java.nio.charset.Charset;
 
-import ro.randr.tictactoe.Activities.GameAndChatActivity;
 import ro.randr.tictactoe.Activities.MainActivity;
-import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
-import ro.randr.tictactoe.Models.BoardState;
+import ro.randr.tictactoe.Enums.ConnectionState;
+import ro.randr.tictactoe.Enums.TicTac;
+import ro.randr.tictactoe.Models.ConnectionPayloadModel;
 import ro.randr.tictactoe.Models.DeviceModel;
-import ro.randr.tictactoe.Models.GameState;
 import ro.randr.tictactoe.Models.MessageModel;
-import ro.randr.tictactoe.Models.TicTac;
+import ro.randr.tictactoe.Observables.ChatMessageObservable;
+import ro.randr.tictactoe.Observables.ConnectionStateObservable;
+import ro.randr.tictactoe.Observables.GameStateObservable;
+import ro.randr.tictactoe.Observables.MainActivityStateObservable;
 
 public class ConnectionUtils {
 
@@ -49,22 +50,23 @@ public class ConnectionUtils {
                 MessageModel messageModel = g.fromJson(message, MessageModel.class);
                 if (messageModel.ChatMessageModel != null) {
                     messageModel.ChatMessageModel.IsOwn = false;
-                    GameAndChatActivity.mAdapter.addToDataSet(messageModel.ChatMessageModel);
+                    ChatMessageObservable.getInstance().addChatToList(messageModel.ChatMessageModel);
                 }
+
+                GameStateObservable boardState = GameStateObservable.getInstance();
                 if (messageModel.ClickMessageModel != null) {
-                    GameState.getInstance().setYourTurn(true);
-                    if (GameState.getInstance().getPlayerType() == TicTac.TIC)
-                    {
-                        BoardState.getInstance().modifyCell(messageModel.ClickMessageModel.Y, messageModel.ClickMessageModel.X,TicTac.TAC);
+                    boardState.setYourTurn(true);
+                    if (boardState.getPlayerType() == TicTac.TIC) {
+                        boardState.modifyCell(messageModel.ClickMessageModel.Y, messageModel.ClickMessageModel.X, TicTac.TAC);
                     } else {
-                        BoardState.getInstance().modifyCell(messageModel.ClickMessageModel.Y, messageModel.ClickMessageModel.X,TicTac.TIC);
+                        boardState.modifyCell(messageModel.ClickMessageModel.Y, messageModel.ClickMessageModel.X, TicTac.TIC);
                     }
 
-                    BoardState.getInstance().checkAndSetWinner();
+                    boardState.checkAndSetWinner();
                 }
 
                 if (messageModel.IsOpponentReady != null) {
-                    GameState.getInstance().setOpponentReady(true);
+                    boardState.setOpponentReady(true);
                 }
             }
         }
@@ -82,12 +84,12 @@ public class ConnectionUtils {
                     @Override
                     public void onEndpointFound(@NonNull String endpointId, @NonNull DiscoveredEndpointInfo info) {
                         DeviceModel device = new DeviceModel(info.getEndpointName(), endpointId, info.getServiceId());
-                        MainActivity.mAdapter.addToDataSet(device);
+                        MainActivityStateObservable.getInstance().addDeviceToList(device);
                     }
 
                     @Override
                     public void onEndpointLost(@NonNull String endpointId) {
-                        MainActivity.mAdapter.removeFromDataSet(endpointId);
+                        MainActivityStateObservable.getInstance().removeDeviceFromList(endpointId);
                     }
                 };
     }
@@ -97,48 +99,44 @@ public class ConnectionUtils {
                 new ConnectionLifecycleCallback() {
                     @Override
                     public void onConnectionInitiated(@NonNull String endpointId, @NonNull ConnectionInfo connectionInfo) {
-                        Dialog dialog = new Dialog(context, "accept_connection", "token: " + connectionInfo.getAuthenticationDigits(), new TwoOptionsDialog() {
-                            @Override
-                            public void onPositive() {
-                                Nearby.getConnectionsClient(context)
-                                        .acceptConnection(endpointId,  new ReceiveBytesPayloadListener());
-                                GameState.getInstance().setAreYouReady(true);
-                                Intent intent = new Intent(context, GameAndChatActivity.class);
-                                context.startActivity(intent);
-                            }
-
-                            @Override
-                            public void onNegative() {
-                                Nearby.getConnectionsClient(context).rejectConnection(endpointId);
-                            }
-                        });
-                        dialog.show();
+                        MainActivityStateObservable.getInstance().setConnectionPayload(new ConnectionPayloadModel(connectionInfo.getAuthenticationDigits(), endpointId));
                     }
 
                     @Override
                     public void onConnectionResult(@NonNull String endpointId, @NonNull ConnectionResolution result) {
+                        ConnectionStateObservable connectionState = ConnectionStateObservable.getInstance();
                         switch (result.getStatus().getStatusCode()) {
                             case ConnectionsStatusCodes.STATUS_OK:
-                                Toast.makeText(context, "Connected to : " + endpointId, Toast.LENGTH_SHORT).show();
-                                GameState.getInstance().setConnectedEndPoint(endpointId);
-                                GameState.getInstance().setOpponentReady(true);
+                                connectionState.setConnectionStateAndId(ConnectionState.STATUS_OK, endpointId);
+                                GameStateObservable.getInstance().setConnectedEndPoint(endpointId);
+                                GameStateObservable.getInstance().setOpponentReady(true);
                                 break;
                             case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED:
-                                Toast.makeText(context, "Refused to: " + endpointId, Toast.LENGTH_SHORT).show();
+                                connectionState.setConnectionStateAndId(ConnectionState.STATUS_CONNECTION_REJECTED, endpointId);
                                 break;
                             case ConnectionsStatusCodes.STATUS_ERROR:
-                                Toast.makeText(context, "Error to: " + endpointId, Toast.LENGTH_SHORT).show();
+                                connectionState.setConnectionStateAndId(ConnectionState.STATUS_ERROR, endpointId);
                                 break;
                             default:
-                                Toast.makeText(context, "Unknown to: " + endpointId, Toast.LENGTH_SHORT).show();
+                                connectionState.setConnectionStateAndId(ConnectionState.STATUS_UNKNOWN, endpointId);
                         }
                     }
 
                     @Override
                     public void onDisconnected(@NonNull String endpointId) {
-                        Toast.makeText(context, "Disconnected from: " + endpointId, Toast.LENGTH_SHORT).show();
+                        ConnectionStateObservable.getInstance().setConnectionStateAndId(ConnectionState.STATUS_DISCONNECTED, endpointId);
                     }
                 };
+    }
+
+    public static void acceptConn(Context context, String endPointId) {
+        Nearby.getConnectionsClient(context)
+                .acceptConnection(endPointId, new ReceiveBytesPayloadListener());
+        GameStateObservable.getInstance().setAreYouReady(true);
+    }
+
+    public static void rejectConn(Context context, String endPointId) {
+        Nearby.getConnectionsClient(context).rejectConnection(endPointId);
     }
 
     public static void StartAdvertising(Context context) {
@@ -166,16 +164,18 @@ public class ConnectionUtils {
         Nearby.getConnectionsClient(context)
                 .startDiscovery(context.getPackageName(), endpointDiscoveryCallback, discoveryOptions)
                 .addOnSuccessListener(
-                        (Void unused) -> Toast.makeText(context, "Discovery started!", Toast.LENGTH_SHORT).show())
+                        (Void unused) -> {
+                        })
                 .addOnFailureListener(
-                        (Exception e) -> Toast.makeText(context, "Discovery NOT started!", Toast.LENGTH_SHORT).show());
+                        (Exception e) -> {
+                        });
     }
 
-    public static void RequestConnection(Context context, DeviceModel toDevice) {
-        GameState.getInstance().setPlayerType(TicTac.TIC);
-        GameState.getInstance().setYourTurn(true);
+    public static void RequestConnection(Context context, DeviceModel toDevice, String yorUsername) {
+        GameStateObservable.getInstance().setPlayerType(TicTac.TIC);
+        GameStateObservable.getInstance().setYourTurn(true);
         Nearby.getConnectionsClient(context)
-                .requestConnection(MainActivity.username, toDevice.EndpointId, connectionLifecycleCallback)
+                .requestConnection(yorUsername, toDevice.EndpointId, connectionLifecycleCallback)
                 .addOnSuccessListener(
                         (Void unused) -> {
                             // We successfully requested a connection. Now both sides
@@ -191,7 +191,7 @@ public class ConnectionUtils {
         String sendInfo = new Gson().toJson(messageModel);
         byte[] bytes = sendInfo.getBytes(Charset.defaultCharset());
         Payload bytesPayload = Payload.fromBytes(bytes);
-        Nearby.getConnectionsClient(context).sendPayload(GameState.getInstance().getConnectedEndPoint(), bytesPayload);
+        Nearby.getConnectionsClient(context).sendPayload(GameStateObservable.getInstance().getConnectedEndPoint(), bytesPayload);
     }
 
 }

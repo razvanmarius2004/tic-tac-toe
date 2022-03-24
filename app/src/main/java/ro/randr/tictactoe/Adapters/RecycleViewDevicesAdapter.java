@@ -1,6 +1,5 @@
 package ro.randr.tictactoe.Adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,33 +9,31 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Optional;
 
 import ro.randr.tictactoe.Models.DeviceModel;
+import ro.randr.tictactoe.Observables.MainActivityStateObservable;
 import ro.randr.tictactoe.R;
-import ro.randr.tictactoe.Utils.ConnectionUtils;
 
 
 public class RecycleViewDevicesAdapter extends RecyclerView.Adapter<RecycleViewDevicesAdapter.RecycleViewHolder> {
 
-    private List<DeviceModel> devices;
-    private WeakReference<Context> mWeakRef;
+    private final List<DeviceModel> devices;
 
-    public RecycleViewDevicesAdapter(WeakReference<Context> mWeakRef, List<DeviceModel> devices) {
+    public RecycleViewDevicesAdapter(List<DeviceModel> devices) {
         this.devices = devices;
-        this.mWeakRef = mWeakRef;
     }
 
-    public void addToDataSet(DeviceModel device) {
-        devices.add(device);
-        this.notifyDataSetChanged();
-    }
+    public void modifyList(DeviceModel device) {
+        Optional<DeviceModel> deviceToFInd = devices.stream().filter(p -> p.EndpointId.equals(device.EndpointId)).findFirst();
+        if (deviceToFInd.isPresent()) {
+            devices.remove(device);
+        } else {
+            devices.add(device);
+        }
+        notifyDataSetChanged();
 
-    public void removeFromDataSet(String endpointId) {
-        DeviceModel device = devices.stream().filter(p -> p.EndpointId.equals(endpointId)).findFirst().get();
-        devices.remove(device);
-        this.notifyDataSetChanged();
     }
 
     @NonNull
@@ -49,16 +46,12 @@ public class RecycleViewDevicesAdapter extends RecyclerView.Adapter<RecycleViewD
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecycleViewDevicesAdapter.RecycleViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecycleViewDevicesAdapter.RecycleViewHolder holder,
+                                 int position) {
         AppCompatTextView tv_name = holder.tv_name;
         AppCompatImageView iv_connect = holder.iv_connect;
         tv_name.setText(devices.get(position).EndpointId + " " + devices.get(position).Name);
-        iv_connect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ConnectionUtils.RequestConnection(mWeakRef.get(), devices.get(position));
-            }
-        });
+        iv_connect.setOnClickListener(view -> MainActivityStateObservable.getInstance().requestConnection(holder.getAdapterPosition()));
 
     }
 
@@ -70,6 +63,7 @@ public class RecycleViewDevicesAdapter extends RecyclerView.Adapter<RecycleViewD
     public static class RecycleViewHolder extends RecyclerView.ViewHolder {
         AppCompatTextView tv_name;
         AppCompatImageView iv_connect;
+
         public RecycleViewHolder(@NonNull View itemView) {
             super(itemView);
             this.tv_name = itemView.findViewById(R.id.tv_name);

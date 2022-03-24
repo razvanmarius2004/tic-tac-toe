@@ -20,8 +20,8 @@ import ro.randr.tictactoe.R;
 
 public class RecycleViewChatAdapter extends RecyclerView.Adapter<RecycleViewChatAdapter.RecycleViewHolder> {
 
-    private List<ChatMessageModel> messages;
-    private WeakReference<Context> mWeakRef;
+    private final List<ChatMessageModel> messages;
+    private final WeakReference<Context> mWeakRef;
     private RecyclerView mRecyclerView;
 
     public RecycleViewChatAdapter(WeakReference<Context> mWeakRef, List<ChatMessageModel> messages) {
@@ -30,7 +30,7 @@ public class RecycleViewChatAdapter extends RecyclerView.Adapter<RecycleViewChat
     }
 
     @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
 
         mRecyclerView = recyclerView;
@@ -38,8 +38,8 @@ public class RecycleViewChatAdapter extends RecyclerView.Adapter<RecycleViewChat
 
     public void addToDataSet(ChatMessageModel chatMessageModel) {
         messages.add(chatMessageModel);
-        this.notifyDataSetChanged();
-        mRecyclerView.scrollToPosition(getItemCount() -1);
+        this.notifyItemChanged(messages.size() - 1);
+        mRecyclerView.scrollToPosition(getItemCount() - 1);
     }
 
 
@@ -60,7 +60,6 @@ public class RecycleViewChatAdapter extends RecyclerView.Adapter<RecycleViewChat
         AppCompatTextView tv_opponent = holder.tv_opponent;
 
         if (messages.get(position).IsOwn) {
-            //cl_opponent_chat.setVisibility(View.GONE);
             Drawable d = cl_opponent_chat.getBackground();
             d.setTint(mWeakRef.get().getColor(R.color.background));
             cl_opponent_chat.setBackground(d);

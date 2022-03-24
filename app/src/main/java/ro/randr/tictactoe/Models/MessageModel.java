@@ -1,9 +1,7 @@
 package ro.randr.tictactoe.Models;
 
 
-
 public class MessageModel {
-
 
     public ChatMessageModel ChatMessageModel;
     public ClickMessageModel ClickMessageModel;
