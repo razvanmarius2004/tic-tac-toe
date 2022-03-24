@@ -58,6 +58,7 @@ public class MainActivityStateObservable extends Observable {
     public void removeDeviceFromList(String endpointId) {
         DeviceModel device = devices.stream().filter(p -> p.EndpointId.equals(endpointId)).findFirst().get();
         devices.remove(device);
+        setChanged();
         notifyObservers(device);
     }
 
@@ -65,6 +66,10 @@ public class MainActivityStateObservable extends Observable {
         isConnectionRequested = true;
         setChanged();
         notifyObservers(devices.get(position));
+    }
+
+    public void removeAllDevices() {
+        devices.removeAll(devices);
     }
 
 }

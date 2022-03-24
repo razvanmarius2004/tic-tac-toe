@@ -12,9 +12,10 @@
         android:id="@+id/et_username"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_goneMarginEnd="10dp"
-        android:layout_marginTop="@dimen/view_side_margin"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="@dimen/username"
+        app:layout_goneMarginEnd="30dp"
+        app:layout_constraintBottom_toBottomOf="@id/iv_edit_username"
+        app:layout_constraintTop_toTopOf="@id/iv_edit_username"
         app:layout_constraintEnd_toStartOf="@id/iv_edit_username">
 
     </androidx.appcompat.widget.AppCompatEditText>
@@ -54,46 +55,36 @@
 
     </androidx.appcompat.widget.AppCompatImageView>
 
+
+
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_start_discovery"
+        android:id="@+id/btn_ready_not_ready"
         style="@style/NiceButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/view_side_margin"
         android:layout_marginEnd="@dimen/view_side_margin"
-        android:text="@string/btn_start_discovery"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_done"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/btn_start_advertising">
-
-    </androidx.appcompat.widget.AppCompatButton>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_start_advertising"
-        style="@style/NiceButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/view_side_margin"
-        android:layout_marginEnd="@dimen/view_side_margin"
-        android:text="@string/btn_start_advertising"
+        android:layout_marginTop="100dp"
+        android:text="@string/btn_set_ready"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/rv_devices"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_start_discovery">
+        app:layout_constraintTop_toBottomOf="@+id/iv_done">
 
     </androidx.appcompat.widget.AppCompatButton>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_devices"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="@dimen/view_side_margin"
         android:layout_marginEnd="@dimen/view_side_margin"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_start_advertising">
+        app:layout_constraintTop_toBottomOf="@id/btn_ready_not_ready">
 
     </androidx.recyclerview.widget.RecyclerView>
 

@@ -35,8 +35,8 @@ import ro.randr.tictactoe.Utils.ConnectionUtils;
 import ro.randr.tictactoe.Utils.Dialog;
 
 public class MainActivity extends AppCompatActivity implements Observer {
-    private AppCompatButton btn_start_discovery;
-    private AppCompatButton btn_start_advertising;
+
+    private AppCompatButton btn_ready_not_ready;
     private AppCompatImageView iv_edit_username;
     private AppCompatImageView iv_cancel;
     private AppCompatImageView iv_done;
@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private RecycleViewDevicesAdapter mAdapter;
     public static List<DeviceModel> devices = new ArrayList<>();
     private static final int REQUEST_PERMISSIONS = 1;
+
+    private boolean areYouReady = false;
 
     private Observable mainActivityState;
     private Observable connectionStateObservable;
@@ -73,8 +75,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private void getViews() {
-        btn_start_discovery = findViewById(R.id.btn_start_discovery);
-        btn_start_advertising = findViewById(R.id.btn_start_advertising);
+
+        btn_ready_not_ready = findViewById(R.id.btn_ready_not_ready);
         iv_edit_username = findViewById(R.id.iv_edit_username);
         iv_cancel = findViewById(R.id.iv_cancel);
         iv_done = findViewById(R.id.iv_done);
@@ -84,8 +86,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
 
     private void setViews() {
-        btn_start_discovery.setOnClickListener(view -> startDiscovery());
-        btn_start_advertising.setOnClickListener(view -> startAdvertising());
+        btn_ready_not_ready.setOnClickListener(view -> setReadyNotReady());
 
         iv_edit_username.setOnClickListener(view -> modifyUsername());
 
@@ -145,11 +146,25 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     }
 
-    private void startAdvertising() {
+    private void setReadyNotReady() {
         if (!arePermsOk()) {
             showDisclaimerDialog();
         } else {
-            ConnectionUtils.StartAdvertising(this);
+            if (!areYouReady) {
+                ConnectionUtils.StartAdvertising(this);
+                ConnectionUtils.StartDiscovery(this);
+                btn_ready_not_ready.setText(R.string.btn_set_not_ready);
+                iv_edit_username.setVisibility(View.INVISIBLE);
+                areYouReady = true;
+            } else {
+                ConnectionUtils.StopAdvertising(this);
+                ConnectionUtils.StopDiscovery(this);
+                mAdapter.removeAll();
+                MainActivityStateObservable.getInstance().removeAllDevices();
+                btn_ready_not_ready.setText(R.string.btn_set_ready);
+                iv_edit_username.setVisibility(View.VISIBLE);
+                areYouReady = false;
+            }
         }
     }
 
@@ -222,6 +237,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 @Override
                 public void onPositive() {
                     ConnectionUtils.acceptConn(getApplicationContext(), connectionPayload.getEndpointId());
+                    ConnectionUtils.StopDiscovery(getApplicationContext());
+                    ConnectionUtils.StopAdvertising(getApplicationContext());
                     Intent intent = new Intent(MainActivity.this, GameAndChatActivity.class);
                     startActivity(intent);
                 }

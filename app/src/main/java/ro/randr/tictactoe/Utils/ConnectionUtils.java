@@ -171,6 +171,14 @@ public class ConnectionUtils {
                         });
     }
 
+    public static void StopDiscovery(Context context) {
+        Nearby.getConnectionsClient(context).stopDiscovery();
+    }
+
+    public static void StopAdvertising(Context context) {
+        Nearby.getConnectionsClient(context).stopAdvertising();
+    }
+
     public static void RequestConnection(Context context, DeviceModel toDevice, String yorUsername) {
         GameStateObservable.getInstance().setPlayerType(TicTac.TIC);
         GameStateObservable.getInstance().setYourTurn(true);

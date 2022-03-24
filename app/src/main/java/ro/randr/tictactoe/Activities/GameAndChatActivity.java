@@ -222,15 +222,20 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
                 createDialogForGameOver(game.getWinner());
             }
 
-            if (game.isYourTurn()) {
-                setInfo("Your turn");
-            } else {
-                setInfo("Opponent turn");
-            }
+//            if (game.isYourTurn()) {
+//                setInfo("Your turn");
+//            } else {
+//                setInfo("Opponent turn");
+//            }
         }
 
         if (o instanceof CellModel) {
             CellModel changedCell = (CellModel) o;
+            if (GameStateObservable.getInstance().isYourTurn()) {
+                setInfo("Your turn");
+            } else {
+                setInfo("Opponent turn");
+            }
             modifyViews(changedCell);
         }
 

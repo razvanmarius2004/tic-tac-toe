@@ -8,8 +8,10 @@
         android:id="@+id/tv_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="@dimen/device_name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/iv_connect"
+        app:layout_constraintBottom_toBottomOf="@id/iv_connect"
         app:layout_constraintEnd_toStartOf="@id/iv_connect">
 
     </androidx.appcompat.widget.AppCompatTextView>

@@ -9,6 +9,7 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +34,11 @@ public class RecycleViewDevicesAdapter extends RecyclerView.Adapter<RecycleViewD
             devices.add(device);
         }
         notifyDataSetChanged();
+    }
 
+    public void removeAll() {
+        devices.removeAll(devices);
+        notifyDataSetChanged();
     }
 
     @NonNull

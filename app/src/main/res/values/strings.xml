@@ -2,6 +2,8 @@
     <string name="app_name">Tic Tac Toe</string>
     <string name="btn_start_discovery">START DISCOVERY</string>
     <string name="btn_start_advertising">START ADVERTISING</string>
+    <string name="btn_set_ready">SET READY</string>
+    <string name="btn_set_not_ready">SET NOT READY</string>
     <string name="default_username">John</string>
     <string name="username">username</string>
     <string name="button_yes">YES</string>
