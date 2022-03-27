@@ -1,30 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_marginBottom="10dp">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tv_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="@dimen/device_name"
+        app:layout_constraintBottom_toBottomOf="@+id/cl_connect"
+        app:layout_constraintEnd_toStartOf="@+id/gl"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/iv_connect"
-        app:layout_constraintBottom_toBottomOf="@id/iv_connect"
-        app:layout_constraintEnd_toStartOf="@id/iv_connect">
+        app:layout_constraintTop_toTopOf="@+id/cl_connect">
 
     </androidx.appcompat.widget.AppCompatTextView>
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/iv_connect"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".50">
+
+    </androidx.constraintlayout.widget.Guideline>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_connect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/connect"
-        app:layout_constraintStart_toEndOf="@+id/tv_name">
+        app:layout_constraintStart_toEndOf="@id/gl"
+        app:layout_constraintTop_toTopOf="parent">
 
-    </androidx.appcompat.widget.AppCompatImageView>
+
+        <ProgressBar
+            android:id="@+id/pb_connect"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="20dp"
+            android:layout_height="44dp"
+            android:elevation="10dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginStart="30dp"
+            android:indeterminate="true"
+            android:indeterminateDrawable="@drawable/seek_bar"
+            android:max="100"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </ProgressBar>
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_connect"
+            style="@style/NiceButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:elevation="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </androidx.appcompat.widget.AppCompatButton>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/connect"
+            android:elevation="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </androidx.appcompat.widget.AppCompatImageView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -248,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     ConnectionUtils.rejectConn(getApplicationContext(), connectionPayload.getEndpointId());
                     MainActivityStateObservable.getInstance().setConnectionInitiated(false);
                     MainActivityStateObservable.getInstance().setConnectionRequested(false);
+                    mAdapter.notConnected(connectionPayload.getEndpointId());
                 }
             });
             dialog.show();

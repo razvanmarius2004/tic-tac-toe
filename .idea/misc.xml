@@ -21,16 +21,21 @@
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/edit_username.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_alpha_o_box__1_.xml" value="0.1625" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_alpha_x_box_taiat.xml" value="0.1675" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_game_board.xml" value="0.1595" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_icon.xml" value="0.1625" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_icon_background.xml" value="0.1625" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tac_1.xml" value="0.1595" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tac_cut_down_left_up_right.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tac_cut_up_dwon.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tac_cut_up_left_down_right.xml" value="0.1675" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tic_1.xml" value="0.1595" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tic_2.xml" value="0.1185" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tic_cut_down_left_up_right.xml" value="0.1375" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tic_cut_left_right.xml" value="0.1375" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tic_cut_up_dwon.xml" value="0.1375" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tic_cut_up_left_down_right.xml" value="0.1375" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/ic_tic_tac_toe_game.xml" value="0.1625" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/seek_bar.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/send.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/tac.xml" value="0.1675" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/drawable/tic.xml" value="0.1675" />
@@ -38,7 +43,7 @@
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/activity_main.xml" value="0.23278985507246377" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/chat1_cardview.xml" value="0.23278985507246377" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/chat_cardview.xml" value="0.2" />
-        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/devices_cardview.xml" value="0.23278985507246377" />
+        <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/devices_cardview.xml" value="0.264" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/layout/dialog.xml" value="0.23278985507246377" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/mipmap-anydpi-v26/ic_icon.xml" value="0.1625" />
         <entry key="..\:/Proiecte/TicTacToe/app/src/main/res/mipmap-anydpi-v26/ic_icon_round.xml" value="0.1625" />
