@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.EditText;
 import android.widget.GridLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +17,8 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -46,9 +50,10 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
     private GridLayout gl_game_grid;
     private RecyclerView rv_chat_history;
     private RecycleViewChatAdapter mAdapter;
-    private AppCompatEditText et_message;
+   // private AppCompatEditText et_message;
     private AppCompatImageView iv_send;
     private AppCompatTextView tv_info;
+    private TextInputEditText et_message;
 
     private Observable gameStateObservable;
     private Observable connectionStateObservable;
@@ -75,7 +80,7 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
 
     private void getViews() {
         gl_game_grid = findViewById(R.id.gl_grid);
-        et_message = findViewById(R.id.et_message);
+        et_message = findViewById(R.id.et);
         iv_send = findViewById(R.id.iv_send);
         rv_chat_history = findViewById(R.id.rv_chat_history);
         tv_info = findViewById(R.id.tv_info);
