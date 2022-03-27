@@ -11,4 +11,7 @@
     <string name="you_won">You won! Play again?</string>
     <string name="you_lose">You lost! Play again?</string>
     <string name="draw">It\'s a draw! Play again?</string>
+    <string name="disclaimer">Tic Tac Toe needs to access your device location and uses bluetooth in order to discover and connect to nearby devices. Press "ALLOW" to proceed</string>
+    <string name="button_allow">ALLOW</string>
+    <string name="button_do_no_allow">DENY</string>
 </resources>

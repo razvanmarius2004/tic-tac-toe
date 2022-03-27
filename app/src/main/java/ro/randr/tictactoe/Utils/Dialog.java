@@ -16,7 +16,6 @@ import ro.randr.tictactoe.R;
 public class Dialog extends AlertDialog {
 
     private final TwoOptionsDialog mClickListener;
-    private final Context mContext;
     private final String mDialogType;
     private final String mMessage;
 
@@ -26,7 +25,6 @@ public class Dialog extends AlertDialog {
 
     public Dialog(@NonNull Context context, String dialogType, String message, TwoOptionsDialog clickListener) {
         super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-        mContext = context;
         mDialogType = dialogType;
         mMessage = message;
         mClickListener = clickListener;
@@ -85,9 +83,9 @@ public class Dialog extends AlertDialog {
     }
 
     private void setViewsForDisclaimer() {
-        tv_text.setText(mMessage);
-        btn_negative.setText(R.string.button_no);
-        btn_positive.setText(R.string.button_yes);
+        tv_text.setText(R.string.disclaimer);
+        btn_negative.setText(R.string.button_do_no_allow);
+        btn_positive.setText(R.string.button_allow);
     }
 
     private void setViewsForConnection() {
