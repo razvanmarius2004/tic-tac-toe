@@ -195,6 +195,12 @@ public class ConnectionUtils {
                         });
     }
 
+    public static void Disconnect(Context context, String endpointId) {
+        Nearby.getConnectionsClient(context).disconnectFromEndpoint(endpointId);
+        connectionLifecycleCallback = null;
+        endpointDiscoveryCallback = null;
+    }
+
     public static void SendMessage(Context context, MessageModel messageModel) {
         String sendInfo = new Gson().toJson(messageModel);
         byte[] bytes = sendInfo.getBytes(Charset.defaultCharset());

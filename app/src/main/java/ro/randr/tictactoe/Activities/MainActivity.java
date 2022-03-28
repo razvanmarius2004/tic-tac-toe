@@ -239,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     ConnectionUtils.acceptConn(getApplicationContext(), connectionPayload.getEndpointId());
                     ConnectionUtils.StopDiscovery(getApplicationContext());
                     ConnectionUtils.StopAdvertising(getApplicationContext());
+                    mAdapter.removeAll();
                     Intent intent = new Intent(MainActivity.this, GameAndChatActivity.class);
                     startActivity(intent);
                 }

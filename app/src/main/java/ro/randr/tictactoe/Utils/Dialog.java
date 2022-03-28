@@ -78,8 +78,18 @@ public class Dialog extends AlertDialog {
             case "draw":
                 setViewsForDraw();
                 break;
+
+            case "quit_current_match":
+                quitCurrentMatch();
+                break;
         }
 
+    }
+
+    private void quitCurrentMatch() {
+        tv_text.setText(R.string.quit_current_match);
+        btn_negative.setText(R.string.button_no);
+        btn_positive.setText(R.string.button_yes);
     }
 
     private void setViewsForDisclaimer() {

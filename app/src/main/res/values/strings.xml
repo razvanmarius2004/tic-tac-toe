@@ -14,4 +14,5 @@
     <string name="disclaimer">Tic Tac Toe needs to access your device location and uses bluetooth in order to discover and connect to nearby devices. Press "ALLOW" to proceed</string>
     <string name="button_allow">ALLOW</string>
     <string name="button_do_no_allow">DENY</string>
+    <string name="quit_current_match">Are you sure you want to quit the current match?</string>
 </resources>

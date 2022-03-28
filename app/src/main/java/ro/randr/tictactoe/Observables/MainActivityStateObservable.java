@@ -72,4 +72,10 @@ public class MainActivityStateObservable extends Observable {
         devices.removeAll(devices);
     }
 
+    public void reInit() {
+        isConnectionRequested = false;
+        isConnectionInitiated = false;
+        removeAllDevices();
+    }
+
 }

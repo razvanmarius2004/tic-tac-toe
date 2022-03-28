@@ -8,18 +8,19 @@ import ro.randr.tictactoe.Enums.WinType;
 import ro.randr.tictactoe.Enums.Winner;
 import ro.randr.tictactoe.Models.IsGameOverModel;
 import ro.randr.tictactoe.Models.IsOpponentReady;
+import ro.randr.tictactoe.Models.ScoreModel;
 
 public class GameStateObservable extends Observable {
     private final CellModel[][] board;
     private boolean isGameOver;
     private WinType winType;
     private Winner winner;
-
     private TicTac playerType;
     private boolean isYourTurn;
     private boolean areYouReady;
     private boolean isOpponentReady;
     private String connectedEndPoint;
+    private ScoreModel score;
 
     // region getters and setters
 
@@ -81,12 +82,17 @@ public class GameStateObservable extends Observable {
         this.connectedEndPoint = connectedEndPoint;
     }
 
+    public ScoreModel getScore() {
+        return score;
+    }
+
     // endregion
 
     private static GameStateObservable instance;
 
     private GameStateObservable() {
         board = new CellModel[3][3];
+        score = ScoreModel.getInstance();
         initValues(TicTac.TAC, false);
         initCells();
     }
@@ -215,7 +221,7 @@ public class GameStateObservable extends Observable {
                     break;
             }
         }
-        if (isDraw()) {
+        if (!isGameOver && isDraw()) {
             setWin(Winner.DRAW, WinType.NONE);
         }
     }
