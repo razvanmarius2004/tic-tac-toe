@@ -1,9 +1,9 @@
 package ro.randr.tictactoe.Models;
 
-public class IsOpponentReady {
-    private boolean isOpponentReady;
+public class IsOpponentReadyModel {
+    private final boolean isOpponentReady;
 
-    public IsOpponentReady(boolean isOpponentReady) {
+    public IsOpponentReadyModel(boolean isOpponentReady) {
         this.isOpponentReady = isOpponentReady;
     }
 

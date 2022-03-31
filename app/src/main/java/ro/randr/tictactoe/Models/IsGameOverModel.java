@@ -1,7 +1,7 @@
 package ro.randr.tictactoe.Models;
 
 public class IsGameOverModel {
-    private boolean isGameOver;
+    private final boolean isGameOver;
 
     public IsGameOverModel(boolean isGameOver) {
         this.isGameOver = isGameOver;

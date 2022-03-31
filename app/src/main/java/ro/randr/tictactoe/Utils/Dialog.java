@@ -18,6 +18,7 @@ public class Dialog extends AlertDialog {
     private final TwoOptionsDialog mClickListener;
     private final String mDialogType;
     private final String mMessage;
+    private Context mContext;
 
     private AppCompatTextView tv_text;
     private AppCompatButton btn_positive;
@@ -25,6 +26,7 @@ public class Dialog extends AlertDialog {
 
     public Dialog(@NonNull Context context, String dialogType, String message, TwoOptionsDialog clickListener) {
         super(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        mContext = context;
         mDialogType = dialogType;
         mMessage = message;
         mClickListener = clickListener;
@@ -99,7 +101,7 @@ public class Dialog extends AlertDialog {
     }
 
     private void setViewsForConnection() {
-        tv_text.setText(mMessage);
+        tv_text.setText(mContext.getResources().getString(R.string.accept_connection, mMessage));
         btn_negative.setText(R.string.button_no);
         btn_positive.setText(R.string.button_yes);
     }

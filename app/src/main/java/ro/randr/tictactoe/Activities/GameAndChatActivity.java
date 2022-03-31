@@ -32,7 +32,7 @@ import ro.randr.tictactoe.Models.CellModel;
 import ro.randr.tictactoe.Models.ChatMessageModel;
 import ro.randr.tictactoe.Models.ClickMessageModel;
 import ro.randr.tictactoe.Models.IsGameOverModel;
-import ro.randr.tictactoe.Models.IsOpponentReady;
+import ro.randr.tictactoe.Models.IsOpponentReadyModel;
 import ro.randr.tictactoe.Models.MessageModel;
 import ro.randr.tictactoe.Observables.ChatMessageObservable;
 import ro.randr.tictactoe.Observables.ConnectionStateObservable;
@@ -98,6 +98,15 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
             et_message.setText("");
         });
 
+        if (GameStateObservable.getInstance().isOpponentReady()) {
+            if (GameStateObservable.getInstance().isYourTurn()) {
+                setInfo("Your turn");
+            } else {
+                setInfo("Opponent turn");
+            }
+        } else {
+            setInfo("Waiting for opponent");
+        }
         setScore(0, 0);
         setGrid();
         setRecycleView();
@@ -236,8 +245,8 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
             modifyViews(changedCell);
         }
 
-        if (o instanceof IsOpponentReady) {
-            IsOpponentReady isOpponentReady = (IsOpponentReady) o;
+        if (o instanceof IsOpponentReadyModel) {
+            IsOpponentReadyModel isOpponentReady = (IsOpponentReadyModel) o;
             if (isOpponentReady.isOpponentReady()) {
                 if (GameStateObservable.getInstance().isYourTurn()) {
                     setInfo("Your turn");

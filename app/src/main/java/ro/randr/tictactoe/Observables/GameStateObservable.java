@@ -2,12 +2,12 @@ package ro.randr.tictactoe.Observables;
 
 import java.util.Observable;
 
-import ro.randr.tictactoe.Models.CellModel;
 import ro.randr.tictactoe.Enums.TicTac;
 import ro.randr.tictactoe.Enums.WinType;
 import ro.randr.tictactoe.Enums.Winner;
+import ro.randr.tictactoe.Models.CellModel;
 import ro.randr.tictactoe.Models.IsGameOverModel;
-import ro.randr.tictactoe.Models.IsOpponentReady;
+import ro.randr.tictactoe.Models.IsOpponentReadyModel;
 import ro.randr.tictactoe.Models.ScoreModel;
 
 public class GameStateObservable extends Observable {
@@ -71,7 +71,7 @@ public class GameStateObservable extends Observable {
     public void setOpponentReady(boolean opponentReady) {
         isOpponentReady = opponentReady;
         setChanged();
-        notifyObservers(new IsOpponentReady(true));
+        notifyObservers(new IsOpponentReadyModel(true));
     }
 
     public String getConnectedEndPoint() {

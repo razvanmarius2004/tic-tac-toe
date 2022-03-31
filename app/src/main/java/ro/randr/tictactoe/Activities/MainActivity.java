@@ -26,6 +26,7 @@ import java.util.Observer;
 
 import ro.randr.tictactoe.Adapters.RecycleViewDevicesAdapter;
 import ro.randr.tictactoe.Interfaces.TwoOptionsDialog;
+import ro.randr.tictactoe.Models.AdvertisingAndDiscoveryStatusModel;
 import ro.randr.tictactoe.Models.ConnectionPayloadModel;
 import ro.randr.tictactoe.Models.DeviceModel;
 import ro.randr.tictactoe.Observables.ConnectionStateObservable;
@@ -137,22 +138,12 @@ public class MainActivity extends AppCompatActivity implements Observer {
         editor.apply();
     }
 
-    private void startDiscovery() {
-        if (!arePermsOk()) {
-            showDisclaimerDialog();
-        } else {
-            ConnectionUtils.StartDiscovery(this);
-        }
-
-    }
-
     private void setReadyNotReady() {
         if (!arePermsOk()) {
             showDisclaimerDialog();
         } else {
             if (!areYouReady) {
                 ConnectionUtils.StartAdvertising(this);
-                ConnectionUtils.StartDiscovery(this);
                 btn_ready_not_ready.setText(R.string.btn_set_not_ready);
                 iv_edit_username.setVisibility(View.INVISIBLE);
                 areYouReady = true;
@@ -233,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         if (o instanceof ConnectionPayloadModel) {
             ConnectionPayloadModel connectionPayload = (ConnectionPayloadModel) o;
-            Dialog dialog = new Dialog(MainActivity.this, "accept_connection", "token: " + connectionPayload.getAuthenticationToken(), new TwoOptionsDialog() {
+            Dialog dialog = new Dialog(MainActivity.this, "accept_connection", connectionPayload.getAuthenticationToken(), new TwoOptionsDialog() {
                 @Override
                 public void onPositive() {
                     ConnectionUtils.acceptConn(getApplicationContext(), connectionPayload.getEndpointId());
@@ -247,12 +238,29 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 @Override
                 public void onNegative() {
                     ConnectionUtils.rejectConn(getApplicationContext(), connectionPayload.getEndpointId());
-                    MainActivityStateObservable.getInstance().setConnectionInitiated(false);
                     MainActivityStateObservable.getInstance().setConnectionRequested(false);
                     mAdapter.notConnected(connectionPayload.getEndpointId());
                 }
             });
             dialog.show();
+        }
+
+        if (o instanceof AdvertisingAndDiscoveryStatusModel) {
+            AdvertisingAndDiscoveryStatusModel a = AdvertisingAndDiscoveryStatusModel.getInstance();
+            if (a.isAdvertisingProcessFinished() && a.isDiscoveryProcessFinished()) {
+                if (a.isAdvertisingOk() && a.isDiscoveryOk()) {
+                    Toast.makeText(this, R.string.adv_and_disc_ok, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, getResources().getString(R.string.adv_and_disc_not_ok, getResources().getString(R.string.btn_set_ready)), Toast.LENGTH_SHORT).show();
+                    ConnectionUtils.StopAdvertising(this);
+                    ConnectionUtils.StopDiscovery(this);
+                    mAdapter.removeAll();
+                    MainActivityStateObservable.getInstance().removeAllDevices();
+                    btn_ready_not_ready.setText(R.string.btn_set_ready);
+                    iv_edit_username.setVisibility(View.VISIBLE);
+                    areYouReady = false;
+                }
+            }
         }
 
 

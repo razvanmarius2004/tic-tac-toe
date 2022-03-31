@@ -1,7 +1,6 @@
 package ro.randr.tictactoe.Utils;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -25,6 +24,7 @@ import java.nio.charset.Charset;
 import ro.randr.tictactoe.Activities.MainActivity;
 import ro.randr.tictactoe.Enums.ConnectionState;
 import ro.randr.tictactoe.Enums.TicTac;
+import ro.randr.tictactoe.Models.AdvertisingAndDiscoveryStatusModel;
 import ro.randr.tictactoe.Models.ConnectionPayloadModel;
 import ro.randr.tictactoe.Models.DeviceModel;
 import ro.randr.tictactoe.Models.MessageModel;
@@ -37,6 +37,7 @@ public class ConnectionUtils {
 
     private static ConnectionLifecycleCallback connectionLifecycleCallback;
     private static EndpointDiscoveryCallback endpointDiscoveryCallback;
+    private static AdvertisingAndDiscoveryStatusModel advertisingAndDiscoveryStatusModel = AdvertisingAndDiscoveryStatusModel.getInstance();
 
     static class ReceiveBytesPayloadListener extends PayloadCallback {
 
@@ -99,7 +100,7 @@ public class ConnectionUtils {
                 new ConnectionLifecycleCallback() {
                     @Override
                     public void onConnectionInitiated(@NonNull String endpointId, @NonNull ConnectionInfo connectionInfo) {
-                        MainActivityStateObservable.getInstance().setConnectionPayload(new ConnectionPayloadModel(connectionInfo.getAuthenticationDigits(), endpointId));
+                        MainActivityStateObservable.getInstance().sendConnectionPayload(new ConnectionPayloadModel(connectionInfo.getAuthenticationDigits(), endpointId));
                     }
 
                     @Override
@@ -143,15 +144,26 @@ public class ConnectionUtils {
         if (connectionLifecycleCallback == null) {
             InitializeConnectionLifecycleCallback(context);
         }
+        advertisingAndDiscoveryStatusModel.setInitValues();
         AdvertisingOptions advertisingOptions =
                 new AdvertisingOptions.Builder().setStrategy(Strategy.P2P_POINT_TO_POINT).build();
         Nearby.getConnectionsClient(context)
                 .startAdvertising(
                         MainActivity.username, context.getPackageName(), connectionLifecycleCallback, advertisingOptions)
                 .addOnSuccessListener(
-                        (Void unused) -> Toast.makeText(context, "Advertising started!", Toast.LENGTH_SHORT).show())
+                        (Void unused) -> {
+                            advertisingAndDiscoveryStatusModel.setAdvertisingOk(true);
+                            advertisingAndDiscoveryStatusModel.setAdvertisingProcessFinished(true);
+                            StartDiscovery(context);
+                        })
                 .addOnFailureListener(
-                        (Exception e) -> Toast.makeText(context, "Advertising NOT started!", Toast.LENGTH_SHORT).show());
+                        (Exception e) -> {
+                            advertisingAndDiscoveryStatusModel.setAdvertisingOk(false);
+                            advertisingAndDiscoveryStatusModel.setAdvertisingProcessFinished(true);
+                            if (advertisingAndDiscoveryStatusModel.isDiscoveryProcessFinished()) {
+                                MainActivityStateObservable.getInstance().notifyAdvertisingAndDiscoveryStatus(advertisingAndDiscoveryStatusModel);
+                            }
+                        });
     }
 
     public static void StartDiscovery(Context context) {
@@ -165,9 +177,15 @@ public class ConnectionUtils {
                 .startDiscovery(context.getPackageName(), endpointDiscoveryCallback, discoveryOptions)
                 .addOnSuccessListener(
                         (Void unused) -> {
+                            advertisingAndDiscoveryStatusModel.setDiscoveryOk(true);
+                            advertisingAndDiscoveryStatusModel.setDiscoveryProcessFinished(true);
+                            MainActivityStateObservable.getInstance().notifyAdvertisingAndDiscoveryStatus(advertisingAndDiscoveryStatusModel);
                         })
                 .addOnFailureListener(
                         (Exception e) -> {
+                            advertisingAndDiscoveryStatusModel.setDiscoveryOk(false);
+                            advertisingAndDiscoveryStatusModel.setDiscoveryProcessFinished(true);
+                            MainActivityStateObservable.getInstance().notifyAdvertisingAndDiscoveryStatus(advertisingAndDiscoveryStatusModel);
                         });
     }
 

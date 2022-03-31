@@ -4,19 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
+import ro.randr.tictactoe.Models.AdvertisingAndDiscoveryStatusModel;
 import ro.randr.tictactoe.Models.ConnectionPayloadModel;
 import ro.randr.tictactoe.Models.DeviceModel;
 
 public class MainActivityStateObservable extends Observable {
     private Boolean isConnectionRequested;
-    private Boolean isConnectionInitiated;
-    private ConnectionPayloadModel connectionPayload;
     private final List<DeviceModel> devices;
     private static MainActivityStateObservable instance;
 
     private MainActivityStateObservable() {
         isConnectionRequested = false;
-        isConnectionInitiated = false;
         devices = new ArrayList<>();
     }
 
@@ -36,18 +34,17 @@ public class MainActivityStateObservable extends Observable {
         isConnectionRequested = connectionRequested;
     }
 
-    public void setConnectionInitiated(Boolean connectionInitiated) {
-        isConnectionInitiated = connectionInitiated;
+    // endregion
+
+    public void notifyAdvertisingAndDiscoveryStatus(AdvertisingAndDiscoveryStatusModel advertisingAndDiscoveryStatusModel){
+      setChanged();
+      notifyObservers(advertisingAndDiscoveryStatusModel);
     }
 
-
-    public void setConnectionPayload(ConnectionPayloadModel connectionPayload) {
-        this.connectionPayload = connectionPayload;
+    public void sendConnectionPayload(ConnectionPayloadModel connectionPayload) {
         setChanged();
         notifyObservers(connectionPayload);
     }
-
-    // endregion
 
     public void addDeviceToList(DeviceModel device) {
         devices.add(device);
@@ -74,7 +71,6 @@ public class MainActivityStateObservable extends Observable {
 
     public void reInit() {
         isConnectionRequested = false;
-        isConnectionInitiated = false;
         removeAllDevices();
     }
 
