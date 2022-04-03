@@ -20,7 +20,7 @@ public class GameStateObservable extends Observable {
     private boolean areYouReady;
     private boolean isOpponentReady;
     private String connectedEndPoint;
-    private ScoreModel score;
+    private final ScoreModel score;
 
     // region getters and setters
 
@@ -34,10 +34,6 @@ public class GameStateObservable extends Observable {
 
     public Winner getWinner() {
         return winner;
-    }
-
-    public boolean isGameOver() {
-        return isGameOver;
     }
 
     public TicTac getPlayerType() {
