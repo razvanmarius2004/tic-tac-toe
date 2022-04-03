@@ -97,7 +97,7 @@ public class ConnectionUtils {
                 };
     }
 
-    private static void InitializeConnectionLifecycleCallback(Context context) {
+    private static void InitializeConnectionLifecycleCallback() {
         connectionLifecycleCallback =
                 new ConnectionLifecycleCallback() {
                     @Override
@@ -144,7 +144,7 @@ public class ConnectionUtils {
 
     public static void StartAdvertising(Context context) {
         if (connectionLifecycleCallback == null) {
-            InitializeConnectionLifecycleCallback(context);
+            InitializeConnectionLifecycleCallback();
         }
         advertisingAndDiscoveryStatusModel.setInitValues();
         AdvertisingOptions advertisingOptions =
@@ -171,7 +171,7 @@ public class ConnectionUtils {
     public static void StartDiscovery(Context context) {
         InitializeEndpointDiscoveryCallback();
         if (connectionLifecycleCallback == null) {
-            InitializeConnectionLifecycleCallback(context);
+            InitializeConnectionLifecycleCallback();
         }
         DiscoveryOptions discoveryOptions =
                 new DiscoveryOptions.Builder().setStrategy(Strategy.P2P_POINT_TO_POINT).build();

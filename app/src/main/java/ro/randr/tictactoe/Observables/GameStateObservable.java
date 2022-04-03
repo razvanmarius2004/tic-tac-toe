@@ -105,11 +105,7 @@ public class GameStateObservable extends Observable {
         winner = Winner.NONE;
         winType = WinType.NONE;
         playerType = yourType;
-        if (yourType == TicTac.TIC) {
-            isYourTurn = true;
-        } else {
-            isYourTurn = false;
-        }
+        isYourTurn = yourType == TicTac.TIC;
         this.areYouReady = areYouReady;
     }
 

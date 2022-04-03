@@ -51,10 +51,6 @@ public class AdvertisingAndDiscoveryStatusModel {
         isAdvertisingProcessFinished = advertisingProcessFinished;
     }
 
-    public static void setInstance(AdvertisingAndDiscoveryStatusModel instance) {
-        AdvertisingAndDiscoveryStatusModel.instance = instance;
-    }
-
     public void setInitValues() {
         isAdvertisingOk = false;
         isDiscoveryOk = false;

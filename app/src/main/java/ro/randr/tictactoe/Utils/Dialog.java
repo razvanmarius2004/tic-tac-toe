@@ -18,7 +18,7 @@ public class Dialog extends AlertDialog {
     private final TwoOptionsDialog mClickListener;
     private final String mDialogType;
     private final String mMessage;
-    private Context mContext;
+    private final Context mContext;
 
     private AppCompatTextView tv_text;
     private AppCompatButton btn_positive;

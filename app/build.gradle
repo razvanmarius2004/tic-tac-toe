@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "ro.randr.tictactoe"
-        minSdk 29
+        minSdk 26
         targetSdk 31
         versionCode 2
         versionName "1.2"

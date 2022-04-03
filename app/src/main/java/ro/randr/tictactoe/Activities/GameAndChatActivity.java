@@ -21,6 +21,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -78,9 +79,7 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
         connectionStateObservable.addObserver(this);
 
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
-        chatViewModel.getChats().observe(this, chatMessageModels -> {
-            mAdapter.addToDataSet(chatMessageModels.get(chatMessageModels.size()-1));
-        });
+        chatViewModel.getChats().observe(this, chatMessageModels -> mAdapter.addToDataSet(chatMessageModels.get(chatMessageModels.size()-1)));
         ConnectionUtils.createChatViewModel(this);
     }
 
@@ -95,7 +94,7 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
 
     private void setViews() {
         iv_send.setOnClickListener(view -> {
-            ChatMessageModel chatMessageModel = new ChatMessageModel(MainActivity.username, et_message.getText().toString(), true);
+            ChatMessageModel chatMessageModel = new ChatMessageModel(MainActivity.username, Objects.requireNonNull(et_message.getText()).toString(), true);
             MessageModel messageModel = new MessageModel(chatMessageModel, null, null);
             ConnectionUtils.SendMessage(GameAndChatActivity.this, messageModel);
 
@@ -118,7 +117,7 @@ public class GameAndChatActivity extends AppCompatActivity implements Observer {
     }
 
     private void setScore(int yourScore, int opponentScore) {
-        tv_score.setText("Your score: " + yourScore + "  Opponent score: " + opponentScore);
+        tv_score.setText(getResources().getString(R.string.score, Integer.toString(yourScore), Integer.toString(opponentScore)));
     }
 
     private void setRecycleView() {

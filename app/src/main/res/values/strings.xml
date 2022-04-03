@@ -18,4 +18,5 @@
     <string name="accept_connection">Does the code matches the code displayed on the opponent screen? \n Code: %1s</string>
     <string name="adv_and_disc_ok">Nearby devices discovery has started!</string>
     <string name="adv_and_disc_not_ok">Something went Wrong please press \"%1s\" button again!</string>
+    <string name="score">Your score:  %1s  Opponent score: %2s</string>
 </resources>

@@ -10,7 +10,7 @@ import java.util.List;
 import ro.randr.tictactoe.Models.ChatMessageModel;
 
 public class ChatViewModel extends ViewModel {
-    private final MutableLiveData<List<ChatMessageModel>> chats = new MutableLiveData<List<ChatMessageModel>>();
+    private final MutableLiveData<List<ChatMessageModel>> chats = new MutableLiveData<>();
     public LiveData<List<ChatMessageModel>> getChats() {
         return chats;
     }
