@@ -3,6 +3,8 @@ package ro.randr.tictactoe.Utils;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -28,17 +30,17 @@ import ro.randr.tictactoe.Models.AdvertisingAndDiscoveryStatusModel;
 import ro.randr.tictactoe.Models.ConnectionPayloadModel;
 import ro.randr.tictactoe.Models.DeviceModel;
 import ro.randr.tictactoe.Models.MessageModel;
-import ro.randr.tictactoe.Observables.ChatMessageObservable;
 import ro.randr.tictactoe.Observables.ConnectionStateObservable;
 import ro.randr.tictactoe.Observables.GameStateObservable;
 import ro.randr.tictactoe.Observables.MainActivityStateObservable;
+import ro.randr.tictactoe.ViewModels.ChatViewModel;
 
 public class ConnectionUtils {
 
     private static ConnectionLifecycleCallback connectionLifecycleCallback;
     private static EndpointDiscoveryCallback endpointDiscoveryCallback;
-    private static AdvertisingAndDiscoveryStatusModel advertisingAndDiscoveryStatusModel = AdvertisingAndDiscoveryStatusModel.getInstance();
-
+    private static final AdvertisingAndDiscoveryStatusModel advertisingAndDiscoveryStatusModel = AdvertisingAndDiscoveryStatusModel.getInstance();
+    private static ChatViewModel chatViewModel;
     static class ReceiveBytesPayloadListener extends PayloadCallback {
 
         @Override
@@ -51,7 +53,7 @@ public class ConnectionUtils {
                 MessageModel messageModel = g.fromJson(message, MessageModel.class);
                 if (messageModel.ChatMessageModel != null) {
                     messageModel.ChatMessageModel.IsOwn = false;
-                    ChatMessageObservable.getInstance().addChatToList(messageModel.ChatMessageModel);
+                    chatViewModel.addChat(messageModel.ChatMessageModel);
                 }
 
                 GameStateObservable boardState = GameStateObservable.getInstance();
@@ -217,6 +219,10 @@ public class ConnectionUtils {
         Nearby.getConnectionsClient(context).disconnectFromEndpoint(endpointId);
         connectionLifecycleCallback = null;
         endpointDiscoveryCallback = null;
+    }
+
+    public static void createChatViewModel(ViewModelStoreOwner owner) {
+        chatViewModel =  new ViewModelProvider(owner).get(ChatViewModel.class);
     }
 
     public static void SendMessage(Context context, MessageModel messageModel) {
