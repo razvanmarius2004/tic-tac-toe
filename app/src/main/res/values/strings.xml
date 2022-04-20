@@ -19,4 +19,6 @@
     <string name="adv_and_disc_ok">Nearby devices discovery has started!</string>
     <string name="adv_and_disc_not_ok">Something went Wrong please press \"%1s\" button again!</string>
     <string name="score">Your score:  %1s  Opponent score: %2s</string>
+    <string name="info_ready">Press the \"%1s\" button to start nearby opponents discovery and to make yourself discoverable for others</string>
+    <string name="info_not_ready">Press the \"%1s\" button to end nearby opponents discovery and to make yourself not discoverable for others</string>
 </resources>

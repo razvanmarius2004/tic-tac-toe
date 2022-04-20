@@ -55,6 +55,21 @@
 
     </androidx.appcompat.widget.AppCompatImageView>
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:textAlignment="center"
+        android:textSize="@dimen/device_name"
+        android:layout_marginHorizontal="@dimen/view_side_margin"
+        app:layout_constraintBottom_toTopOf="@+id/btn_ready_not_ready"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_done">
+
+    </androidx.appcompat.widget.AppCompatTextView>
+
 
 
     <androidx.appcompat.widget.AppCompatButton

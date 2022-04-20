@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private AppCompatImageView iv_cancel;
     private AppCompatImageView iv_done;
     private AppCompatEditText et_username;
+    private AppCompatTextView tv_info;
     private RecyclerView rv_devices;
     public static String username;
     private RecycleViewDevicesAdapter mAdapter;
@@ -76,13 +78,13 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     private void getViews() {
-
         btn_ready_not_ready = findViewById(R.id.btn_ready_not_ready);
         iv_edit_username = findViewById(R.id.iv_edit_username);
         iv_cancel = findViewById(R.id.iv_cancel);
         iv_done = findViewById(R.id.iv_done);
         et_username = findViewById(R.id.et_username);
         rv_devices = findViewById(R.id.rv_devices);
+        tv_info = findViewById(R.id.tv_info);
     }
 
 
@@ -94,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
         iv_cancel.setOnClickListener(view -> cancelModifyUsername());
 
         iv_done.setOnClickListener(view -> setUsername());
+
+        tv_info.setText(getResources().getString(R.string.info_ready, getResources().getString(R.string.btn_set_ready)));
 
         et_username.setText(username);
         et_username.setEnabled(false);
@@ -145,12 +149,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
             if (!areYouReady) {
                 ConnectionUtils.StartAdvertising(this);
                 btn_ready_not_ready.setText(R.string.btn_set_not_ready);
+                tv_info.setText(getResources().getString(R.string.info_not_ready, getResources().getString(R.string.btn_set_not_ready)));
                 iv_edit_username.setVisibility(View.INVISIBLE);
                 areYouReady = true;
             } else {
                 ConnectionUtils.StopAdvertising(this);
                 ConnectionUtils.StopDiscovery(this);
                 mAdapter.removeAll();
+                tv_info.setText(getResources().getString(R.string.info_ready, getResources().getString(R.string.btn_set_ready)));
                 MainActivityStateObservable.getInstance().removeAllDevices();
                 btn_ready_not_ready.setText(R.string.btn_set_ready);
                 iv_edit_username.setVisibility(View.VISIBLE);
